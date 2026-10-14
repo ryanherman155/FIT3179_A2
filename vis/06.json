@@ -1,0 +1,137 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 06 - Dumbbell plot comparing each state's and territory's Census population in 2016 (hollow dot) and 2021 (filled dot). The connecting bar is the change. Labels give the percentage increase; states are ordered by 2021 population.",
+  "width": 1000,
+  "height": 340,
+  "params": [{"name": "compact", "value": false}],
+  "data": {
+    "url": "data/06_state_population_dumbbell.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "asgs_state_code": "number",
+        "population_2016": "number",
+        "population_2021": "number",
+        "growth_persons": "number",
+        "growth_percent": "number"
+      }
+    }
+  },
+  "transform": [
+    {"joinaggregate": [{"op": "max", "field": "growth_percent", "as": "max_growth_percent"}]},
+    {"calculate": "compact ? datum.state_code : datum.state_name", "as": "label"}
+  ],
+  "encoding": {
+    "y": {
+      "field": "label",
+      "type": "nominal",
+      "title": null,
+      "sort": {"field": "population_2021", "order": "descending"},
+      "axis": {
+        "domain": false,
+        "ticks": false,
+        "labelFontSize": 13,
+        "labelColor": "#19302e",
+        "labelPadding": 10,
+        "labelLimit": 220
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {"type": "rule", "strokeWidth": 6, "strokeCap": "round", "color": "#b9d3c7"},
+      "encoding": {
+        "x": {
+          "field": "population_2016",
+          "type": "quantitative",
+          "title": "Residents (millions)",
+          "scale": {"domain": [0, 9800000], "nice": false},
+          "axis": {
+            "values": [0, 2000000, 4000000, 6000000, 8000000],
+            "labelExpr": "datum.value == 0 ? '0' : format(datum.value / 1000000, 'd') + 'm'",
+            "grid": true,
+            "domain": false,
+            "tickSize": 0,
+            "titleFontWeight": 400
+          }
+        },
+        "x2": {"field": "population_2021"}
+      }
+    },
+    {
+      "transform": [
+        {"fold": ["population_2016", "population_2021"], "as": ["census", "population"]},
+        {
+          "calculate": "datum.census == 'population_2016' ? '2016' : '2021'",
+          "as": "Census year"
+        }
+      ],
+      "params": [
+        {
+          "name": "hoverDot",
+          "select": {
+            "type": "point",
+            "on": "pointerover",
+            "clear": "pointerout",
+            "fields": ["label", "Census year"]
+          }
+        }
+      ],
+      "mark": {"type": "point", "size": 120, "strokeWidth": 2.5, "opacity": 1},
+      "encoding": {
+        "x": {"field": "population", "type": "quantitative"},
+        "fill": {
+          "field": "Census year",
+          "type": "nominal",
+          "scale": {"domain": ["2016", "2021"], "range": ["#fffefa", "#1d7a68"]},
+          "legend": {
+            "orient": "top",
+            "direction": "horizontal",
+            "title": null,
+            "symbolStrokeColor": "#1d7a68",
+            "symbolStrokeWidth": 2.5,
+            "symbolSize": 120,
+            "labelFontSize": 13
+          }
+        },
+        "stroke": {"value": "#1d7a68"},
+        "size": {"condition": {"param": "hoverDot", "empty": false, "value": 260}, "value": 120},
+        "tooltip": [
+          {"field": "state_name", "title": "State/territory"},
+          {"field": "Census year", "title": "Census"},
+          {"field": "population", "type": "quantitative", "format": ",", "title": "Residents"},
+          {
+            "field": "growth_persons",
+            "type": "quantitative",
+            "format": ",",
+            "title": "Change 2016–2021 (people)"
+          },
+          {
+            "field": "growth_percent",
+            "type": "quantitative",
+            "format": ".1f",
+            "title": "Change 2016–2021 (%)"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {"type": "text", "align": "left", "dx": 14, "fontSize": 12.5},
+      "encoding": {
+        "x": {"field": "population_2021", "type": "quantitative"},
+        "text": {"field": "pct_label"},
+        "color": {
+          "condition": {"test": "datum.growth_percent == datum.max_growth_percent", "value": "#a8502a"},
+          "value": "#3f524d"
+        }
+      },
+      "transform": [
+        {
+          "calculate": "'+' + format(datum.growth_percent, '.1f') + '%' + (!compact ? '  (+' + format(datum.growth_persons, ',') + ')' : '')",
+          "as": "pct_label"
+        }
+      ]
+    }
+  ],
+  "config": {"view": {"stroke": null}}
+}

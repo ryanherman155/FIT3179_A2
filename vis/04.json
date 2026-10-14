@@ -1,0 +1,273 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 04 - Proportional-symbol map. Circle AREA is proportional to the number of people added in each state or territory between the 2016 and 2021 Censuses (linear size scale from zero, which Vega-Lite maps to area). Circle colour shows the percentage increase. Albers equal-area conic projection.",
+  "width": 640,
+  "height": 520,
+  "params": [{"name": "compact", "value": false}],
+  "projection": {"type": "conicEqualArea", "parallels": [-18, -36], "rotate": [-132, 0]},
+  "layer": [
+    {
+      "description": "Base map: neutral fill so that the symbols, not the land area, carry the data.",
+      "data": {
+        "url": "geo/aus_states_2021.topo.json",
+        "format": {"type": "topojson", "feature": "states"}
+      },
+      "mark": {"type": "geoshape", "fill": "#ecefe7", "stroke": "#fffefa", "strokeWidth": 1.2}
+    },
+    {
+      "data": {
+        "url": "geo/state_label_points.csv",
+        "format": {
+          "type": "csv",
+          "parse": {
+            "asgs_state_code": "number",
+            "longitude": "number",
+            "latitude": "number",
+            "label_longitude": "number",
+            "label_latitude": "number"
+          }
+        }
+      },
+      "transform": [
+        {
+          "lookup": "state_code",
+          "from": {
+            "data": {
+              "url": "data/04_state_growth_symbol_map.csv",
+              "format": {
+                "type": "csv",
+                "parse": {
+                  "asgs_state_code": "number",
+                  "population_2016": "number",
+                  "population_2021": "number",
+                  "growth_persons": "number",
+                  "growth_percent": "number"
+                }
+              }
+            },
+            "key": "state_code",
+            "fields": [
+              "state_name",
+              "population_2016",
+              "population_2021",
+              "growth_persons",
+              "growth_percent"
+            ]
+          }
+        },
+        {
+          "calculate": "datum.growth_persons >= 100000 ? '+' + format(datum.growth_persons / 1000, '.0f') + 'k' : '+' + format(datum.growth_persons / 1000, '.1f') + 'k'",
+          "as": "growth_label"
+        },
+        {
+          "joinaggregate": [{"op": "max", "field": "growth_percent", "as": "max_growth_percent"}]
+        }
+      ],
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverSym",
+              "select": {
+                "type": "point",
+                "on": "pointerover",
+                "clear": "pointerout",
+                "fields": ["state_code"]
+              }
+            }
+          ],
+          "mark": {"type": "circle", "opacity": 0.86, "stroke": "#fffefa", "strokeWidth": 1.5},
+          "encoding": {
+            "longitude": {"field": "longitude", "type": "quantitative"},
+            "latitude": {"field": "latitude", "type": "quantitative"},
+            "size": {
+              "field": "growth_persons",
+              "type": "quantitative",
+              "title": "People added, 2016–2021",
+              "scale": {"type": "linear", "zero": true, "domain": [0, 600000], "range": [0, 8000]},
+              "legend": {
+                "values": [50000, 200000, 500000],
+                "orient": "bottom",
+                "direction": "horizontal",
+                "symbolFillColor": "#ffffff",
+                "symbolStrokeColor": "#8f3a16",
+                "symbolStrokeWidth": 1,
+                "symbolOpacity": 1,
+                "labelExpr": "format(datum.value, ',')",
+                "title": "People added, 2016–2021"
+              }
+            },
+            "color": {
+              "field": "growth_percent",
+              "type": "quantitative",
+              "title": "Growth, 2016–2021 (%)",
+              "scale": {
+                "domain": [0, 15],
+                "range": ["#f8e2d4", "#e9a57b", "#d9703f", "#a8502a", "#6e2f12"]
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "format": ".0f",
+                "values": [0, 5, 10, 15],
+                "gradientLength": 130,
+                "title": "Increase, 2016–2021 (%)"
+              }
+            },
+            "order": {"field": "growth_persons", "sort": "descending"},
+            "stroke": {
+              "condition": {"param": "hoverSym", "empty": false, "value": "#19302e"},
+              "value": "#fffefa"
+            },
+            "strokeWidth": {"condition": {"param": "hoverSym", "empty": false, "value": 2.5}, "value": 1.5},
+            "tooltip": [
+              {"field": "state_name", "title": "State/territory"},
+              {
+                "field": "population_2016",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2016"
+              },
+              {
+                "field": "population_2021",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2021"
+              },
+              {
+                "field": "growth_persons",
+                "type": "quantitative",
+                "format": ",",
+                "title": "People added"
+              },
+              {
+                "field": "growth_percent",
+                "type": "quantitative",
+                "format": ".1f",
+                "title": "Increase (%)"
+              }
+            ]
+          }
+        },
+        {
+          "transform": [{"filter": "datum.state_code == 'ACT'"}],
+          "mark": {"type": "rule", "color": "#5d6a64", "strokeWidth": 1},
+          "encoding": {
+            "longitude": {"field": "longitude", "type": "quantitative"},
+            "latitude": {"field": "latitude", "type": "quantitative"},
+            "longitude2": {"field": "label_longitude"},
+            "latitude2": {"field": "label_latitude"}
+          }
+        },
+        {
+          "description": "Label inside the circle when the circle is large enough (radius > 22 px) to hold it.",
+          "transform": [
+            {"filter": "datum.state_code != 'ACT'"},
+            {"calculate": "[datum.state_code, datum.growth_label]", "as": "lines"}
+          ],
+          "mark": {
+            "type": "text",
+            "align": "center",
+            "baseline": "middle",
+            "fontSize": 12,
+            "fontWeight": 600,
+            "lineHeight": 14,
+            "color": "#19302e"
+          },
+          "encoding": {
+            "longitude": {"field": "longitude", "type": "quantitative"},
+            "latitude": {"field": "latitude", "type": "quantitative"},
+            "text": {"field": "lines"},
+            "color": {"value": "#ffffff"},
+            "opacity": {
+              "condition": {"test": "sqrt(scale('size', datum.growth_persons) / PI) > 22", "value": 1},
+              "value": 0
+            }
+          }
+        },
+        {
+          "description": "Labels below circles that are too small to hold them.",
+          "transform": [
+            {
+              "filter": "datum.state_code != 'ACT' && datum.state_code != 'NSW' && datum.state_code != 'QLD'"
+            },
+            {"calculate": "datum.state_code + ' ' + datum.growth_label", "as": "lines"}
+          ],
+          "mark": {
+            "type": "text",
+            "align": "center",
+            "baseline": "top",
+            "fontSize": 12,
+            "fontWeight": 600,
+            "lineHeight": 14,
+            "color": "#19302e",
+            "dy": {"expr": "sqrt(scale('size', datum.growth_persons) / PI) + 3"}
+          },
+          "encoding": {
+            "longitude": {"field": "longitude", "type": "quantitative"},
+            "latitude": {"field": "latitude", "type": "quantitative"},
+            "text": {"field": "lines"},
+            "color": {"value": "#19302e"},
+            "opacity": {
+              "condition": {"test": "sqrt(scale('size', datum.growth_persons) / PI) > 22", "value": 0},
+              "value": 1
+            }
+          }
+        },
+        {
+          "description": "NSW and QLD: when their circles are too small for an inside label, the label goes to the east of the circle (over the sea) to avoid neighbouring circles.",
+          "transform": [
+            {"filter": "datum.state_code == 'NSW' || datum.state_code == 'QLD'"},
+            {"calculate": "datum.state_code + ' ' + datum.growth_label", "as": "lines"}
+          ],
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "fontSize": 12,
+            "fontWeight": 600,
+            "lineHeight": 14,
+            "color": "#19302e",
+            "dy": 0,
+            "dx": {"expr": "sqrt(scale('size', datum.growth_persons) / PI) + 4"}
+          },
+          "encoding": {
+            "longitude": {"field": "longitude", "type": "quantitative"},
+            "latitude": {"field": "latitude", "type": "quantitative"},
+            "text": {"field": "lines"},
+            "color": {"value": "#19302e"},
+            "opacity": {
+              "condition": {"test": "sqrt(scale('size', datum.growth_persons) / PI) > 22", "value": 0},
+              "value": 1
+            }
+          }
+        },
+        {
+          "transform": [
+            {"filter": "datum.state_code == 'ACT'"},
+            {
+              "calculate": "compact ? [datum.state_code + ' ' + datum.growth_label, '+' + format(datum.growth_percent, '.1f') + '%'] : [datum.state_code + ' ' + datum.growth_label, '+' + format(datum.growth_percent, '.1f') + '%' + (datum.growth_percent == datum.max_growth_percent ? ' (fastest)' : '')]",
+              "as": "lines"
+            }
+          ],
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "dx": 4,
+            "fontSize": 12,
+            "fontWeight": 600,
+            "lineHeight": 14,
+            "color": "#19302e"
+          },
+          "encoding": {
+            "longitude": {"field": "label_longitude", "type": "quantitative"},
+            "latitude": {"field": "label_latitude", "type": "quantitative"},
+            "text": {"field": "lines"}
+          }
+        }
+      ]
+    }
+  ],
+  "config": {"view": {"stroke": null}}
+}

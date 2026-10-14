@@ -1,0 +1,9 @@
+﻿state_code,state_name,asgs_state_code,population_2021,source_id
+NSW,New South Wales,1,8072163,ABS_LOC
+VIC,Victoria,2,6503491,ABS_LOC
+QLD,Queensland,3,5156138,ABS_LOC
+SA,South Australia,4,1781516,ABS_LOC
+WA,Western Australia,5,2660026,ABS_LOC
+TAS,Tasmania,6,557571,ABS_LOC
+NT,Northern Territory,7,232605,ABS_LOC
+ACT,Australian Capital Territory,8,454499,ABS_LOC

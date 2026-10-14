@@ -1,0 +1,207 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 01 - Annotated time series of Australia's Census population at all 17 national Censuses, 1911 to 2021.",
+  "width": 760,
+  "height": 380,
+  "params": [{"name": "compact", "value": false}],
+  "data": {
+    "url": "data/01_historical_population_timeline.csv",
+    "format": {"type": "csv", "parse": {"year": "number", "population": "number"}}
+  },
+  "layer": [
+    {
+      "description": "Annotation band: the 14-year gap between the 1933 and 1947 Censuses.",
+      "data": {"values": [{"start": 1933, "end": 1947, "label": "14 years without a Census"}]},
+      "mark": {"type": "rect", "color": "#ecebe1", "opacity": 0.9},
+      "encoding": {
+        "x": {"field": "start", "type": "quantitative"},
+        "x2": {"field": "end"},
+        "y": {"datum": 0, "type": "quantitative"},
+        "y2": {"datum": 28}
+      }
+    },
+    {
+      "data": {"values": [{"x": 1940}]},
+      "mark": {
+        "type": "text",
+        "align": "center",
+        "baseline": "top",
+        "fontSize": 11,
+        "color": "#6b7670",
+        "lineHeight": 14
+      },
+      "encoding": {
+        "x": {"field": "x", "type": "quantitative"},
+        "y": {"datum": 27, "type": "quantitative"},
+        "text": {"value": ["No Census", "for 14 years"]}
+      },
+      "transform": [{"filter": "!compact"}]
+    },
+    {
+      "description": "Methodological annotation: until 1966 official counts excluded many Aboriginal people.",
+      "data": {"values": [{"start": 1911, "end": 1966}]},
+      "mark": {"type": "rule", "color": "#b07a5a", "strokeWidth": 1.5, "strokeDash": [3, 3]},
+      "encoding": {
+        "x": {"field": "start", "type": "quantitative"},
+        "x2": {"field": "end"},
+        "y": {"datum": 1.2, "type": "quantitative"}
+      }
+    },
+    {
+      "data": {"values": [{"x": 1911}]},
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "bottom",
+        "dy": -4,
+        "fontSize": 11,
+        "color": "#8a5a3c"
+      },
+      "encoding": {
+        "x": {"field": "x", "type": "quantitative"},
+        "y": {"datum": 1.2, "type": "quantitative"},
+        "text": {"value": "1911-1966: official totals excluded many Aboriginal people"}
+      },
+      "transform": [{"filter": "!compact"}]
+    },
+    {
+      "description": "CSV-driven layers share the x (year) and y (population in millions) encodings.",
+      "transform": [{"calculate": "datum.population / 1000000", "as": "population_m"}],
+      "encoding": {
+        "x": {
+          "field": "year",
+          "type": "quantitative",
+          "title": null,
+          "scale": {"domain": [1908, 2024], "nice": false, "zero": false},
+          "axis": {
+            "values": [1911, 1921, 1933, 1947, 1961, 1971, 1981, 1991, 2001, 2011, 2021],
+            "format": "d",
+            "labelExpr": "compact && indexof([1921, 1961, 1981, 2001], datum.value) >= 0 ? '' : datum.label",
+            "grid": false,
+            "tickSize": 5
+          }
+        },
+        "y": {
+          "field": "population_m",
+          "type": "quantitative",
+          "title": null,
+          "scale": {"domain": [0, 28], "nice": false},
+          "axis": {
+            "values": [0, 5, 10, 15, 20, 25],
+            "labelExpr": "datum.value == 0 ? '0' : datum.value + 'm'",
+            "domain": false,
+            "ticks": false
+          }
+        }
+      },
+      "layer": [
+        {
+          "mark": {"type": "area", "color": "#1d7a68", "opacity": 0.12, "interpolate": "linear"},
+          "encoding": {"y": {"field": "population_m", "type": "quantitative"}}
+        },
+        {
+          "mark": {"type": "line", "color": "#1d7a68", "strokeWidth": 2.5, "interpolate": "linear"}
+        },
+        {
+          "params": [
+            {
+              "name": "hover",
+              "select": {"type": "point", "on": "pointerover", "nearest": true, "clear": "pointerout"}
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "fill": "#fffefa",
+            "stroke": "#1d7a68",
+            "strokeWidth": 2,
+            "size": 46,
+            "opacity": 1
+          },
+          "encoding": {
+            "size": {"condition": {"param": "hover", "empty": false, "value": 140}, "value": 46},
+            "tooltip": [
+              {"field": "year", "type": "ordinal", "title": "Census year"},
+              {
+                "field": "population",
+                "type": "quantitative",
+                "title": "People counted",
+                "format": ","
+              }
+            ]
+          }
+        },
+        {
+          "description": "Text annotations. Positions come from the CSV via lookup; only the wording is written here.",
+          "data": {
+            "values": [
+              {"year": 1911, "text": "First national Census", "side": "right", "dy": -26},
+              {"year": 1947, "text": "Growth speeds up after 1947", "side": "left", "dy": -34},
+              {"year": 1971, "text": "Half of today's population", "side": "left", "dy": -30},
+              {"year": 2021, "text": "2021 Census", "side": "left", "dy": -26}
+            ]
+          },
+          "transform": [
+            {
+              "lookup": "year",
+              "from": {
+                "data": {
+                  "url": "data/01_historical_population_timeline.csv",
+                  "format": {"type": "csv", "parse": {"year": "number", "population": "number"}}
+                },
+                "key": "year",
+                "fields": ["population"]
+              }
+            },
+            {"calculate": "datum.population / 1000000", "as": "population_m"},
+            {
+              "calculate": "[datum.text, format(datum.population_m, datum.population_m < 10 ? '.2f' : '.1f') + ' million']",
+              "as": "lines"
+            }
+          ],
+          "layer": [
+            {
+              "transform": [{"filter": "datum.side == 'right'"}],
+              "mark": {
+                "type": "text",
+                "align": "left",
+                "baseline": "bottom",
+                "dx": -6,
+                "dy": -22,
+                "fontSize": 12,
+                "lineHeight": 15,
+                "color": "#19302e"
+              },
+              "encoding": {
+                "text": {"field": "lines"},
+                "y": {"field": "population_m", "type": "quantitative"}
+              }
+            },
+            {
+              "transform": [
+                {"filter": "datum.side == 'left'"},
+                {"filter": "!(compact && (datum.year == 1947 || datum.year == 1971))"}
+              ],
+              "mark": {
+                "type": "text",
+                "align": "right",
+                "baseline": "bottom",
+                "dx": 4,
+                "dy": -12,
+                "fontSize": 12,
+                "lineHeight": 15,
+                "color": "#19302e"
+              },
+              "encoding": {
+                "text": {"field": "lines"},
+                "y": {"field": "population_m", "type": "quantitative"}
+              }
+            }
+          ],
+          "encoding": {"x": {"field": "year", "type": "quantitative"}}
+        }
+      ]
+    }
+  ],
+  "config": {"view": {"stroke": null}}
+}

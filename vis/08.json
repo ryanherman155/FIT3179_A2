@@ -1,0 +1,204 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 08 - Heatmap of the share of all people counted in each broad age group at the 2011 and 2021 Censuses (one shared colour scale), with a second column showing the change in percentage points on a diverging scale.",
+  "data": {
+    "url": "data/08_age_group_heatmap.csv",
+    "format": {
+      "type": "csv",
+      "parse": {"year": "number", "population": "number", "percent_of_total": "number"}
+    }
+  },
+  "transform": [
+    {"calculate": "replace(datum.age_group, '-', '–')", "as": "age_label"},
+    {"calculate": "toString(datum.year)", "as": "census"}
+  ],
+  "spacing": 18,
+  "hconcat": [
+    {
+      "title": {"text": "Share of all people (%)", "fontSize": 12, "fontWeight": 600},
+      "width": 300,
+      "height": 300,
+      "encoding": {
+        "x": {
+          "field": "census",
+          "type": "ordinal",
+          "title": null,
+          "axis": {
+            "orient": "top",
+            "domain": false,
+            "ticks": false,
+            "labelFontSize": 13,
+            "labelFontWeight": 700,
+            "labelColor": "#19302e",
+            "labelAngle": 0
+          }
+        },
+        "y": {
+          "field": "age_label",
+          "type": "ordinal",
+          "title": null,
+          "sort": ["0–14", "15–24", "25–44", "45–64", "65+"],
+          "axis": {
+            "domain": false,
+            "ticks": false,
+            "labelFontSize": 13,
+            "labelColor": "#19302e",
+            "titleColor": "#66736d",
+            "titleFontWeight": 400
+          }
+        }
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverCell",
+              "select": {"type": "point", "on": "pointerover", "clear": "pointerout"}
+            }
+          ],
+          "mark": {"type": "rect", "stroke": "#fffefa", "strokeWidth": 3, "cornerRadius": 3},
+          "encoding": {
+            "color": {
+              "field": "percent_of_total",
+              "type": "quantitative",
+              "title": "% of all people",
+              "scale": {
+                "domain": [10, 30],
+                "range": ["#eef3ec", "#b9d6c9", "#6fa894", "#2c7d68", "#0f4a40"]
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "gradientLength": 160,
+                "values": [10, 15, 20, 25, 30],
+                "format": "d"
+              }
+            },
+            "stroke": {
+              "condition": {"param": "hoverCell", "empty": false, "value": "#19302e"},
+              "value": "#fffefa"
+            },
+            "tooltip": [
+              {"field": "age_label", "title": "Age group"},
+              {"field": "census", "title": "Census"},
+              {
+                "field": "population",
+                "type": "quantitative",
+                "format": ",",
+                "title": "People counted"
+              },
+              {
+                "field": "percent_of_total",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Share of all people (%)"
+              }
+            ]
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 14, "fontWeight": 600},
+          "encoding": {
+            "text": {"field": "percent_of_total", "type": "quantitative", "format": ".1f"},
+            "color": {
+              "condition": {"test": "datum.percent_of_total >= 21", "value": "#ffffff"},
+              "value": "#19302e"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": {"text": "Change (points)", "fontSize": 12, "fontWeight": 600},
+      "width": 150,
+      "height": 300,
+      "transform": [
+        {"pivot": "census", "value": "percent_of_total", "groupby": ["age_label"]},
+        {"calculate": "datum['2021'] - datum['2011']", "as": "change_pp"},
+        {
+          "calculate": "(datum.change_pp >= 0 ? '+' : '−') + format(abs(datum.change_pp), '.1f')",
+          "as": "change_label"
+        }
+      ],
+      "encoding": {
+        "x": {
+          "datum": "2011 → 2021",
+          "type": "ordinal",
+          "title": null,
+          "axis": {
+            "orient": "top",
+            "domain": false,
+            "ticks": false,
+            "labelFontSize": 13,
+            "labelFontWeight": 700,
+            "labelColor": "#19302e",
+            "labelAngle": 0
+          }
+        },
+        "y": {
+          "field": "age_label",
+          "type": "ordinal",
+          "sort": ["0–14", "15–24", "25–44", "45–64", "65+"],
+          "axis": null
+        }
+      },
+      "layer": [
+        {
+          "mark": {"type": "rect", "stroke": "#fffefa", "strokeWidth": 3, "cornerRadius": 3},
+          "encoding": {
+            "color": {
+              "field": "change_pp",
+              "type": "quantitative",
+              "title": "Change (percentage points)",
+              "scale": {
+                "domain": [-3.5, 3.5],
+                "range": ["#c7612f", "#f2c4a4", "#efeee8", "#a9cfbf", "#1d7a68"]
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "gradientLength": 110,
+                "values": [-3, 0, 3],
+                "labelExpr": "datum.value > 0 ? '+' + datum.value : datum.value < 0 ? '−' + abs(datum.value) : '0'",
+                "title": "Change (points)"
+              }
+            },
+            "tooltip": [
+              {"field": "age_label", "title": "Age group"},
+              {
+                "field": "2011",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Share in 2011 (%)"
+              },
+              {
+                "field": "2021",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Share in 2021 (%)"
+              },
+              {
+                "field": "change_pp",
+                "type": "quantitative",
+                "format": "+.2f",
+                "title": "Change (percentage points)"
+              }
+            ]
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 14, "fontWeight": 600},
+          "encoding": {
+            "text": {"field": "change_label"},
+            "color": {
+              "condition": {"test": "abs(datum.change_pp) >= 2.5", "value": "#ffffff"},
+              "value": "#19302e"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "resolve": {"scale": {"color": "independent", "y": "shared"}},
+  "config": {"view": {"stroke": null}}
+}

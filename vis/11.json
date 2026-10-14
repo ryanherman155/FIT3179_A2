@@ -1,0 +1,271 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Chart 11 - Isotype (pictogram) chart of average people per household in 1911, 1961, 2001 and 2021 (rounded figures published by AIFS). One full figure = one person on average. A partly filled figure shows the fractional part of the average: the filled width is clipped to exactly that fraction, so 4.5 is drawn as four full figures and the left half of a fifth.",
+  "width": 620,
+  "padding": 4,
+  "autosize": "none",
+  "signals": [
+    {"name": "labelW", "update": "width < 420 ? 48 : 64"},
+    {"name": "valueW", "update": "width < 420 ? 54 : 80"},
+    {"name": "slots", "update": "data('slotCount')[0].slots"},
+    {"name": "iconStep", "update": "min(72, (width - labelW - valueW) / slots)"},
+    {"name": "iconSize", "update": "iconStep * 0.86"},
+    {"name": "rowH", "update": "iconStep * 1.2"},
+    {"name": "nRows", "update": "length(data('households'))"},
+    {"name": "noteH", "value": 40},
+    {"name": "height", "update": "nRows * rowH + noteH"},
+    {
+      "name": "hoverYear",
+      "value": null,
+      "on": [
+        {"events": "@iconHit:pointerover", "update": "datum.year"},
+        {"events": "@iconHit:pointerout", "update": "null"}
+      ]
+    },
+    {
+      "name": "personPath",
+      "value": "M0,-0.96 A0.28,0.28 0 1,1 0,-0.4 A0.28,0.28 0 1,1 0,-0.96 Z M-0.5,-0.3 L0.5,-0.3 Q0.62,-0.3 0.62,-0.16 L0.62,0.3 L0.36,0.3 L0.36,1 L-0.36,1 L-0.36,0.3 L-0.62,0.3 L-0.62,-0.16 Q-0.62,-0.3 -0.5,-0.3 Z"
+    }
+  ],
+  "data": [
+    {
+      "name": "households",
+      "url": "data/11_household_size_isotype.csv",
+      "format": {
+        "type": "csv",
+        "parse": {"year": "number", "average_people_per_household_rounded": "number"}
+      },
+      "transform": [{"type": "formula", "as": "avg", "expr": "datum.average_people_per_household_rounded"}]
+    },
+    {
+      "name": "slotCount",
+      "source": "households",
+      "transform": [
+        {"type": "aggregate", "fields": ["avg"], "ops": ["max"], "as": ["maxAvg"]},
+        {"type": "formula", "as": "slots", "expr": "ceil(datum.maxAvg)"}
+      ]
+    },
+    {
+      "name": "icons",
+      "source": "households",
+      "transform": [
+        {"type": "formula", "as": "slotIndex", "expr": "sequence(0, slots)"},
+        {"type": "flatten", "fields": ["slotIndex"]},
+        {
+          "type": "formula",
+          "as": "fraction",
+          "expr": "clamp(datum.avg - datum.slotIndex, 0, 1)"
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "row",
+      "type": "band",
+      "domain": {"data": "households", "field": "year", "sort": true},
+      "range": [0, {"signal": "nRows * rowH"}],
+      "paddingInner": 0
+    }
+  ],
+  "marks": [
+    {
+      "type": "rule",
+      "from": {"data": "households"},
+      "encode": {
+        "update": {
+          "x": {"value": 0},
+          "x2": {"signal": "width"},
+          "y": {"scale": "row", "field": "year", "offset": {"signal": "rowH"}},
+          "stroke": {"value": "#ecebe3"},
+          "strokeWidth": {"value": 1}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "households"},
+      "encode": {
+        "update": {
+          "x": {"value": 0},
+          "y": {"scale": "row", "field": "year", "offset": {"signal": "rowH / 2"}},
+          "text": {"signal": "toString(datum.year)"},
+          "baseline": {"value": "middle"},
+          "fontSize": {"signal": "width < 420 ? 14 : 16"},
+          "fontWeight": {"value": 700},
+          "fill": {"value": "#19302e"}
+        }
+      }
+    },
+    {
+      "description": "Background figure for every slot (pale) - shows the 'missing' part of a partly filled figure.",
+      "type": "symbol",
+      "from": {"data": "icons"},
+      "interactive": false,
+      "encode": {
+        "update": {
+          "shape": {"signal": "personPath"},
+          "x": {"signal": "labelW + datum.slotIndex * iconStep + iconStep / 2"},
+          "y": {"scale": "row", "field": "year", "offset": {"signal": "rowH / 2"}},
+          "size": {"signal": "iconSize * iconSize"},
+          "fill": {"value": "#e4e9e3"}
+        }
+      }
+    },
+    {
+      "description": "Filled figures. Each sits in its own clipped group. Vega scales a custom path by sqrt(size)/2, so the figure is 0.62 x iconSize wide and its left edge is at iconStep/2 - 0.31 x iconSize. The clip width reveals exactly fraction x figure width.",
+      "type": "group",
+      "name": "filled",
+      "from": {"data": "icons"},
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {"signal": "labelW + datum.slotIndex * iconStep"},
+          "y": {"scale": "row", "field": "year"},
+          "width": {"signal": "iconStep / 2 - 0.31 * iconSize + datum.fraction * 0.62 * iconSize"},
+          "height": {"signal": "rowH"},
+          "clip": {"value": true}
+        }
+      },
+      "marks": [
+        {
+          "type": "symbol",
+          "interactive": false,
+          "encode": {
+            "update": {
+              "shape": {"signal": "personPath"},
+              "x": {"signal": "iconStep / 2"},
+              "y": {"signal": "rowH / 2"},
+              "size": {"signal": "iconSize * iconSize"},
+              "fill": {
+                "signal": "parent.fraction < 1 ? '#d9703f' : (hoverYear == parent.year ? '#135a4c' : '#1d7a68')"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Invisible hit area per row for the tooltip.",
+      "type": "rect",
+      "name": "iconHit",
+      "from": {"data": "households"},
+      "encode": {
+        "enter": {
+          "tooltip": {
+            "signal": "{'title': toString(datum.year), 'Average people per household (rounded)': format(datum.avg, '.1f'), 'How to read': floor(datum.avg) + ' full figures' + (datum.avg % 1 > 0 ? ' + ' + format(datum.avg % 1, '.1f') + ' of a figure' : '')}"
+          }
+        },
+        "update": {
+          "x": {"value": 0},
+          "x2": {"signal": "width"},
+          "y": {"scale": "row", "field": "year"},
+          "height": {"signal": "rowH"},
+          "fill": {"value": "transparent"},
+          "cursor": {"value": "pointer"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {"data": "households"},
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {"signal": "width"},
+          "y": {"scale": "row", "field": "year", "offset": {"signal": "rowH / 2"}},
+          "text": {"signal": "format(datum.avg, '.1f')"},
+          "align": {"value": "right"},
+          "baseline": {"value": "middle"},
+          "font": {"value": "Playfair Display, Georgia, serif"},
+          "fontSize": {"signal": "width < 420 ? 24 : 32"},
+          "fontWeight": {"value": 600},
+          "fill": {"value": "#135a4c"}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "interactive": false,
+      "encode": {
+        "update": {
+          "shape": {"signal": "personPath"},
+          "x": {"value": 11},
+          "y": {"signal": "nRows * rowH + 22"},
+          "size": {"value": 484},
+          "fill": {"value": "#1d7a68"}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "interactive": false,
+      "encode": {
+        "update": {
+          "shape": {"signal": "personPath"},
+          "x": {"signal": "width < 420 ? 130 : 190"},
+          "y": {"signal": "nRows * rowH + 22"},
+          "size": {"value": 484},
+          "fill": {"value": "#e4e9e3"}
+        }
+      }
+    },
+    {
+      "type": "group",
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {"signal": "(width < 420 ? 130 : 190) - 11"},
+          "y": {"signal": "nRows * rowH + 6"},
+          "width": {"value": 11},
+          "height": {"value": 32},
+          "clip": {"value": true}
+        }
+      },
+      "marks": [
+        {
+          "type": "symbol",
+          "encode": {
+            "update": {
+              "shape": {"signal": "personPath"},
+              "x": {"value": 11},
+              "y": {"value": 16},
+              "size": {"value": 484},
+              "fill": {"value": "#d9703f"}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {"value": 28},
+          "y": {"signal": "nRows * rowH + 22"},
+          "text": {"signal": "width < 420 ? '= 1 person' : '= 1 person on average'"},
+          "baseline": {"value": "middle"},
+          "fontSize": {"value": 12},
+          "fill": {"value": "#3f524d"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {"signal": "(width < 420 ? 130 : 190) + 18"},
+          "y": {"signal": "nRows * rowH + 22"},
+          "text": {
+            "signal": "width < 420 ? '= half (an average, not a person)' : '= half of an average figure (not half a person)'"
+          },
+          "baseline": {"value": "middle"},
+          "fontSize": {"value": 12},
+          "fill": {"value": "#3f524d"}
+        }
+      }
+    }
+  ]
+}

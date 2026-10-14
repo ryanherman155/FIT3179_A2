@@ -1,0 +1,136 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 07 - Slopegraph of the share of the population aged 0-14 and aged 65 and over in 1911 and 2021, from rounded figures published by the Australian Institute of Family Studies. Only the two end points are shown; the straight lines connect them and do not show the path in between.",
+  "width": 560,
+  "height": 380,
+  "data": {
+    "url": "data/07_historical_age_slopegraph.csv",
+    "format": {"type": "csv", "parse": {"year": "number", "share_percent_rounded": "number"}}
+  },
+  "transform": [
+    {
+      "calculate": "datum.age_group == '0-14 years' ? 'Children (0–14)' : 'Older Australians (65+)'",
+      "as": "group"
+    },
+    {"calculate": "format(datum.share_percent_rounded, '.0f') + '%'", "as": "pct_label"}
+  ],
+  "encoding": {
+    "x": {
+      "field": "year",
+      "type": "ordinal",
+      "title": null,
+      "scale": {"type": "point", "padding": 0.9},
+      "axis": {
+        "orient": "top",
+        "domain": false,
+        "ticks": false,
+        "labelFontSize": 15,
+        "labelFontWeight": 700,
+        "labelColor": "#19302e",
+        "labelAngle": 0,
+        "labelPadding": 10
+      }
+    },
+    "y": {
+      "field": "share_percent_rounded",
+      "type": "quantitative",
+      "title": null,
+      "scale": {"domain": [0, 40]},
+      "axis": {
+        "values": [0, 10, 20, 30, 40],
+        "labelExpr": "datum.value + '%'",
+        "domain": false,
+        "ticks": false,
+        "grid": true,
+        "labelColor": "#8a948f"
+      }
+    },
+    "color": {
+      "field": "group",
+      "type": "nominal",
+      "scale": {
+        "domain": ["Children (0–14)", "Older Australians (65+)"],
+        "range": ["#d9703f", "#1d7a68"]
+      },
+      "legend": null
+    }
+  },
+  "layer": [
+    {
+      "mark": {"type": "line", "strokeWidth": 3.5, "strokeCap": "round"},
+      "encoding": {"detail": {"field": "group"}}
+    },
+    {
+      "params": [
+        {
+          "name": "hoverSlope",
+          "select": {"type": "point", "on": "pointerover", "clear": "pointerout"}
+        }
+      ],
+      "mark": {"type": "circle", "size": 150, "opacity": 1, "stroke": "#fffefa", "strokeWidth": 2},
+      "encoding": {
+        "size": {"condition": {"param": "hoverSlope", "empty": false, "value": 300}, "value": 150},
+        "tooltip": [
+          {"field": "group", "title": "Age group"},
+          {"field": "year", "type": "ordinal", "title": "Census year"},
+          {
+            "field": "share_percent_rounded",
+            "type": "quantitative",
+            "format": ".0f",
+            "title": "Share of population (%, rounded)"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Left-hand labels (1911): value and group name.",
+      "transform": [
+        {"filter": "datum.year == 1911"},
+        {"calculate": "datum.pct_label + '  ' + datum.group", "as": "left_label"}
+      ],
+      "mark": {"type": "text", "align": "right", "dx": -14, "fontSize": 13, "fontWeight": 700},
+      "encoding": {"text": {"field": "pct_label"}}
+    },
+    {
+      "transform": [{"filter": "datum.year == 1911"}],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "bottom",
+        "dx": 4,
+        "dy": -12,
+        "fontSize": 12.5,
+        "fontWeight": 600
+      },
+      "encoding": {"text": {"field": "group"}}
+    },
+    {
+      "description": "Right-hand label (2021): both groups round to the same value, so one shared label is used.",
+      "transform": [{"filter": "datum.year == 2021 && datum.age_group == '0-14 years'"}],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 14,
+        "fontSize": 13,
+        "fontWeight": 700,
+        "color": "#19302e"
+      },
+      "encoding": {"text": {"field": "pct_label"}, "color": {"value": "#19302e"}}
+    },
+    {
+      "transform": [{"filter": "datum.year == 2021 && datum.age_group == '0-14 years'"}],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "top",
+        "dx": 14,
+        "dy": 10,
+        "fontSize": 11.5,
+        "color": "#5d6a64",
+        "lineHeight": 14
+      },
+      "encoding": {"text": {"value": ["each (rounded)"]}, "color": {"value": "#5d6a64"}}
+    }
+  ],
+  "config": {"view": {"stroke": null}}
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 12 - Waffle chart: a 10 x 10 grid of 100 squares, each square representing 1% of all households in 2021. The squares are generated from the rounded percentages in the CSV (26% one-person households, 74% other household types), so the grid is complete only if the two categories sum to 100.",
+  "width": 420,
+  "height": 420,
+  "params": [
+    {"name": "compact", "value": false},
+    {
+      "name": "hoverType",
+      "select": {
+        "type": "point",
+        "fields": ["household_type"],
+        "on": "pointerover",
+        "clear": "pointerout"
+      },
+      "bind": "legend"
+    }
+  ],
+  "data": {
+    "url": "data/12_one_person_household_waffle.csv",
+    "format": {"type": "csv", "parse": {"year": "number", "percent_rounded": "number"}}
+  },
+  "transform": [
+    {
+      "window": [{"op": "sum", "field": "percent_rounded", "as": "cum_end"}],
+      "sort": [{"field": "household_type", "order": "ascending"}]
+    },
+    {"calculate": "datum.cum_end - datum.percent_rounded", "as": "cum_start"},
+    {"calculate": "sequence(datum.cum_start, datum.cum_end)", "as": "unit"},
+    {"flatten": ["unit"]},
+    {"calculate": "datum.unit % 10", "as": "col"},
+    {"calculate": "floor(datum.unit / 10)", "as": "row"},
+    {"calculate": "'1% of all households'", "as": "each_square"}
+  ],
+  "layer": [
+    {
+      "mark": {"type": "square", "filled": true, "opacity": 1},
+      "encoding": {
+        "x": {
+          "field": "col",
+          "type": "ordinal",
+          "axis": null,
+          "scale": {"domain": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+        },
+        "y": {
+          "field": "row",
+          "type": "ordinal",
+          "axis": null,
+          "scale": {"domain": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
+        },
+        "size": {"value": {"expr": "pow(width / 10 * 0.82, 2)"}},
+        "color": {
+          "field": "household_type",
+          "type": "nominal",
+          "scale": {
+            "domain": ["One-person household", "Other household types"],
+            "range": ["#d9703f", "#b9d6c9"]
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "title": null,
+            "symbolType": "square",
+            "symbolSize": 180,
+            "labelFontSize": 13,
+            "labelExpr": "datum.label == 'One-person household' ? 'One-person households' : 'All other households'"
+          }
+        },
+        "opacity": {"condition": {"param": "hoverType", "value": 1}, "value": 0.3},
+        "tooltip": [
+          {"field": "household_type", "title": "Household type (2021)"},
+          {
+            "field": "percent_rounded",
+            "type": "quantitative",
+            "format": "d",
+            "title": "Share of all households (%, rounded)"
+          },
+          {"field": "each_square", "title": "Each square"}
+        ]
+      }
+    }
+  ],
+  "config": {"view": {"stroke": null}}
+}

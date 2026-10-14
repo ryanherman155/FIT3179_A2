@@ -1,0 +1,9 @@
+state_code,state_name,asgs_state_code,longitude,latitude,label_longitude,label_latitude
+NSW,New South Wales,1,146.601,-32.485,146.601,-32.485
+VIC,Victoria,2,143.489,-37.03,140.6,-39.7
+QLD,Queensland,3,144.415,-23.028,144.415,-23.028
+SA,South Australia,4,135.92,-29.455,135.92,-29.455
+WA,Western Australia,5,122.058,-26.487,122.058,-26.487
+TAS,Tasmania,6,146.566,-42.092,146.6,-44.35
+NT,Northern Territory,7,133.44,-19.506,133.44,-19.506
+ACT,Australian Capital Territory,8,148.957,-35.456,152.6,-36.6

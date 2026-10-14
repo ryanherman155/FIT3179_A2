@@ -1,0 +1,436 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 03 - Choropleth maps (small multiples) of the 2021 Census population of the eight states and territories. Left: total residents. Right: residents per square kilometre (population divided by ABS land area), which removes the visual bias of very large states. Albers equal-area conic projection.",
+  "params": [{"name": "compact", "value": false}],
+  "spacing": 40,
+  "hconcat": [
+    {
+      "title": {
+        "text": "Total residents",
+        "subtitle": "2021 Census count",
+        "subtitleColor": "#66736d",
+        "subtitleFontSize": 12
+      },
+      "width": 520,
+      "height": 440,
+      "projection": {"type": "conicEqualArea", "parallels": [-18, -36], "rotate": [-132, 0]},
+      "data": {
+        "url": "geo/aus_states_2021.topo.json",
+        "format": {"type": "topojson", "feature": "states"}
+      },
+      "transform": [
+        {
+          "lookup": "properties.state_code",
+          "from": {
+            "data": {
+              "url": "data/03_state_population_choropleth.csv",
+              "format": {
+                "type": "csv",
+                "parse": {"asgs_state_code": "number", "population_2021": "number"}
+              }
+            },
+            "key": "state_code",
+            "fields": ["state_name", "population_2021"]
+          }
+        },
+        {
+          "calculate": "datum.population_2021 / datum.properties.area_albers_sqkm",
+          "as": "density"
+        },
+        {
+          "calculate": "datum.population_2021 < 500000 ? 'Under 0.5 million' : datum.population_2021 < 1000000 ? '0.5–1 million' : datum.population_2021 < 2000000 ? '1–2 million' : datum.population_2021 < 5000000 ? '2–5 million' : 'Over 5 million'",
+          "as": "pop_class",
+          "description": "Classed colour scale: fixed class breaks, written once here and shown in the legend."
+        }
+      ],
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverTotal",
+              "select": {
+                "type": "point",
+                "on": "pointerover",
+                "clear": "pointerout",
+                "fields": ["state_name"]
+              }
+            }
+          ],
+          "mark": {"type": "geoshape", "stroke": "#fffefa", "strokeWidth": 1.2, "strokeJoin": "round"},
+          "encoding": {
+            "color": {
+              "field": "pop_class",
+              "type": "ordinal",
+              "title": "Residents",
+              "scale": {
+                "domain": [
+                  "Under 0.5 million",
+                  "0.5–1 million",
+                  "1–2 million",
+                  "2–5 million",
+                  "Over 5 million"
+                ],
+                "range": ["#e6efe6", "#b5d4c6", "#74ad99", "#2f8571", "#11574a"]
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "columns": 3,
+                "symbolType": "square",
+                "symbolSize": 150,
+                "labelFontSize": 11.5,
+                "columnPadding": 10,
+                "rowPadding": 4,
+                "labelLimit": 140
+              }
+            },
+            "strokeWidth": {"condition": {"param": "hoverTotal", "empty": false, "value": 2.5}, "value": 1.2},
+            "stroke": {
+              "condition": {"param": "hoverTotal", "empty": false, "value": "#19302e"},
+              "value": "#fffefa"
+            },
+            "tooltip": [
+              {"field": "state_name", "title": "State/territory"},
+              {
+                "field": "population_2021",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents (2021 Census)"
+              },
+              {
+                "field": "properties.area_albers_sqkm",
+                "type": "quantitative",
+                "format": ",.0f",
+                "title": "Land area (km²)"
+              },
+              {
+                "field": "density",
+                "type": "quantitative",
+                "format": ",.1f",
+                "title": "Residents per km²"
+              }
+            ]
+          }
+        },
+        {
+          "data": {
+            "url": "geo/state_label_points.csv",
+            "format": {
+              "type": "csv",
+              "parse": {
+                "asgs_state_code": "number",
+                "longitude": "number",
+                "latitude": "number",
+                "label_longitude": "number",
+                "label_latitude": "number"
+              }
+            }
+          },
+          "transform": [
+            {
+              "lookup": "state_code",
+              "from": {
+                "data": {
+                  "url": "data/03_state_population_choropleth.csv",
+                  "format": {
+                    "type": "csv",
+                    "parse": {"asgs_state_code": "number", "population_2021": "number"}
+                  }
+                },
+                "key": "state_code",
+                "fields": ["population_2021"]
+              }
+            },
+            {
+              "calculate": "datum.population_2021 >= 1000000 ? format(datum.population_2021 / 1000000, '.1f') + 'm' : format(datum.population_2021 / 1000, '.0f') + 'k'",
+              "as": "value_label"
+            },
+            {"calculate": "[datum.state_code, datum.value_label]", "as": "lines"}
+          ],
+          "layer": [
+            {
+              "transform": [
+                {
+                  "filter": "datum.label_longitude != datum.longitude || datum.label_latitude != datum.latitude"
+                }
+              ],
+              "mark": {"type": "rule", "color": "#5d6a64", "strokeWidth": 1},
+              "encoding": {
+                "longitude": {"field": "longitude", "type": "quantitative"},
+                "latitude": {"field": "latitude", "type": "quantitative"},
+                "longitude2": {"field": "label_longitude"},
+                "latitude2": {"field": "label_latitude"}
+              }
+            },
+            {
+              "mark": {
+                "type": "text",
+                "fontSize": 12,
+                "fontWeight": 600,
+                "lineHeight": 14,
+                "baseline": "middle",
+                "align": "center"
+              },
+              "encoding": {
+                "longitude": {"field": "label_longitude", "type": "quantitative"},
+                "latitude": {"field": "label_latitude", "type": "quantitative"},
+                "text": {"field": "lines"},
+                "color": {
+                  "condition": {
+                    "test": "datum.population_2021 >= 2000000 && datum.label_longitude == datum.longitude",
+                    "value": "#ffffff"
+                  },
+                  "value": "#19302e"
+                }
+              },
+              "transform": [{"filter": "datum.state_code != 'ACT'"}]
+            },
+            {
+              "mark": {
+                "type": "text",
+                "fontSize": 12,
+                "fontWeight": 600,
+                "lineHeight": 14,
+                "baseline": "middle",
+                "align": "left",
+                "dx": 3
+              },
+              "encoding": {
+                "longitude": {"field": "label_longitude", "type": "quantitative"},
+                "latitude": {"field": "label_latitude", "type": "quantitative"},
+                "text": {"field": "lines"},
+                "color": {
+                  "condition": {
+                    "test": "datum.population_2021 >= 2000000 && datum.state_code != 'ACT'",
+                    "value": "#ffffff"
+                  },
+                  "value": "#19302e"
+                }
+              },
+              "transform": [{"filter": "datum.state_code == 'ACT'"}]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": {
+        "text": "Residents per km²",
+        "subtitle": "2021 Census count ÷ land area",
+        "subtitleColor": "#66736d",
+        "subtitleFontSize": 12
+      },
+      "width": 520,
+      "height": 440,
+      "projection": {"type": "conicEqualArea", "parallels": [-18, -36], "rotate": [-132, 0]},
+      "data": {
+        "url": "geo/aus_states_2021.topo.json",
+        "format": {"type": "topojson", "feature": "states"}
+      },
+      "transform": [
+        {
+          "lookup": "properties.state_code",
+          "from": {
+            "data": {
+              "url": "data/03_state_population_choropleth.csv",
+              "format": {
+                "type": "csv",
+                "parse": {"asgs_state_code": "number", "population_2021": "number"}
+              }
+            },
+            "key": "state_code",
+            "fields": ["state_name", "population_2021"]
+          }
+        },
+        {
+          "calculate": "datum.population_2021 / datum.properties.area_albers_sqkm",
+          "as": "density"
+        },
+        {
+          "calculate": "datum.density < 1 ? 'Under 1' : datum.density < 5 ? '1–5' : datum.density < 20 ? '5–20' : datum.density < 100 ? '20–100' : 'Over 100'",
+          "as": "density_class",
+          "description": "Classed colour scale: fixed class breaks, written once here and shown in the legend."
+        }
+      ],
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverDensity",
+              "select": {
+                "type": "point",
+                "on": "pointerover",
+                "clear": "pointerout",
+                "fields": ["state_name"]
+              }
+            }
+          ],
+          "mark": {"type": "geoshape", "stroke": "#fffefa", "strokeWidth": 1.2, "strokeJoin": "round"},
+          "encoding": {
+            "color": {
+              "field": "density_class",
+              "type": "ordinal",
+              "title": "Residents per km²",
+              "scale": {
+                "domain": ["Under 1", "1–5", "5–20", "20–100", "Over 100"],
+                "range": ["#f6ece4", "#eec7ad", "#dc9468", "#bb5e31", "#7f3514"]
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "columns": 5,
+                "symbolType": "square",
+                "symbolSize": 150,
+                "labelFontSize": 11.5,
+                "columnPadding": 10,
+                "rowPadding": 4,
+                "labelLimit": 140
+              }
+            },
+            "strokeWidth": {"condition": {"param": "hoverDensity", "empty": false, "value": 2.5}, "value": 1.2},
+            "stroke": {
+              "condition": {"param": "hoverDensity", "empty": false, "value": "#19302e"},
+              "value": "#fffefa"
+            },
+            "tooltip": [
+              {"field": "state_name", "title": "State/territory"},
+              {
+                "field": "density",
+                "type": "quantitative",
+                "format": ",.1f",
+                "title": "Residents per km²"
+              },
+              {
+                "field": "population_2021",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents (2021 Census)"
+              },
+              {
+                "field": "properties.area_albers_sqkm",
+                "type": "quantitative",
+                "format": ",.0f",
+                "title": "Land area (km²)"
+              }
+            ]
+          }
+        },
+        {
+          "data": {
+            "url": "geo/state_label_points.csv",
+            "format": {
+              "type": "csv",
+              "parse": {
+                "asgs_state_code": "number",
+                "longitude": "number",
+                "latitude": "number",
+                "label_longitude": "number",
+                "label_latitude": "number"
+              }
+            }
+          },
+          "transform": [
+            {
+              "lookup": "state_code",
+              "from": {
+                "data": {
+                  "url": "data/03_state_population_choropleth.csv",
+                  "format": {
+                    "type": "csv",
+                    "parse": {"asgs_state_code": "number", "population_2021": "number"}
+                  }
+                },
+                "key": "state_code",
+                "fields": ["population_2021"]
+              }
+            },
+            {
+              "lookup": "state_code",
+              "from": {
+                "data": {
+                  "url": "geo/aus_states_2021.topo.json",
+                  "format": {"type": "topojson", "feature": "states"}
+                },
+                "key": "properties.state_code",
+                "fields": ["properties"]
+              }
+            },
+            {
+              "calculate": "datum.population_2021 / datum.properties.area_albers_sqkm",
+              "as": "density"
+            },
+            {
+              "calculate": "[datum.state_code, datum.density >= 10 ? format(datum.density, '.0f') : format(datum.density, '.1f')]",
+              "as": "lines"
+            }
+          ],
+          "layer": [
+            {
+              "transform": [
+                {
+                  "filter": "datum.label_longitude != datum.longitude || datum.label_latitude != datum.latitude"
+                }
+              ],
+              "mark": {"type": "rule", "color": "#5d6a64", "strokeWidth": 1},
+              "encoding": {
+                "longitude": {"field": "longitude", "type": "quantitative"},
+                "latitude": {"field": "latitude", "type": "quantitative"},
+                "longitude2": {"field": "label_longitude"},
+                "latitude2": {"field": "label_latitude"}
+              }
+            },
+            {
+              "mark": {
+                "type": "text",
+                "fontSize": 12,
+                "fontWeight": 600,
+                "lineHeight": 14,
+                "baseline": "middle",
+                "align": "center"
+              },
+              "encoding": {
+                "longitude": {"field": "label_longitude", "type": "quantitative"},
+                "latitude": {"field": "label_latitude", "type": "quantitative"},
+                "text": {"field": "lines"},
+                "color": {
+                  "condition": {
+                    "test": "datum.density >= 20 && datum.label_longitude == datum.longitude",
+                    "value": "#ffffff"
+                  },
+                  "value": "#19302e"
+                }
+              },
+              "transform": [{"filter": "datum.state_code != 'ACT'"}]
+            },
+            {
+              "mark": {
+                "type": "text",
+                "fontSize": 12,
+                "fontWeight": 600,
+                "lineHeight": 14,
+                "baseline": "middle",
+                "align": "left",
+                "dx": 3
+              },
+              "encoding": {
+                "longitude": {"field": "label_longitude", "type": "quantitative"},
+                "latitude": {"field": "label_latitude", "type": "quantitative"},
+                "text": {"field": "lines"},
+                "color": {
+                  "condition": {
+                    "test": "datum.density >= 20 && datum.state_code != 'ACT'",
+                    "value": "#ffffff"
+                  },
+                  "value": "#19302e"
+                }
+              },
+              "transform": [{"filter": "datum.state_code == 'ACT'"}]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resolve": {"scale": {"color": "independent"}},
+  "config": {"view": {"stroke": null}}
+}

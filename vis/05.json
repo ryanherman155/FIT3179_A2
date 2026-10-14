@@ -1,0 +1,190 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 05 - Schematic tile-grid map. Each state or territory is an equal-sized tile placed in its approximate relative position (not to scale). Colour shows the percentage of residents born in Australia, as published by the ABS. A radio control switches between the 2016 and 2021 Censuses.",
+  "width": 420,
+  "height": 410,
+  "params": [
+    {"name": "compact", "value": false},
+    {
+      "name": "censusYear",
+      "value": 2021,
+      "bind": {
+        "input": "radio",
+        "options": [2021, 2016],
+        "labels": ["2021 Census", "2016 Census"],
+        "name": "Show "
+      }
+    }
+  ],
+  "data": {
+    "url": "data/05_australian_born_tile_map.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "asgs_state_code": "number",
+        "year": "number",
+        "australian_born_count": "number",
+        "australian_born_percent_published": "number",
+        "census_population": "number",
+        "calculated_share_percent": "number",
+        "difference_pp": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "description": "Change since 2016, in percentage points, computed from the published (rounded) percentages.",
+      "joinaggregate": [{"op": "min", "field": "year", "as": "first_year"}],
+      "groupby": ["state_code"]
+    },
+    {
+      "calculate": "datum.year == datum.first_year ? datum.australian_born_percent_published : null",
+      "as": "pct_first"
+    },
+    {
+      "joinaggregate": [{"op": "max", "field": "pct_first", "as": "pct_2016"}],
+      "groupby": ["state_code"]
+    },
+    {"calculate": "datum.australian_born_percent_published - datum.pct_2016", "as": "change_pp"},
+    {"filter": "datum.year == censusYear"},
+    {
+      "lookup": "state_code",
+      "from": {
+        "data": {
+          "description": "Schematic tile positions (layout only - not data). Column and row in a 4 x 4 grid.",
+          "values": [
+            {"state_code": "NT", "col": 1, "row": 0},
+            {"state_code": "QLD", "col": 2, "row": 0},
+            {"state_code": "WA", "col": 0, "row": 1},
+            {"state_code": "SA", "col": 1, "row": 1},
+            {"state_code": "NSW", "col": 2, "row": 1},
+            {"state_code": "ACT", "col": 3, "row": 1},
+            {"state_code": "VIC", "col": 2, "row": 2},
+            {"state_code": "TAS", "col": 2, "row": 3}
+          ]
+        },
+        "key": "state_code",
+        "fields": ["col", "row"]
+      }
+    },
+    {
+      "calculate": "(datum.change_pp >= 0 ? '+' : '−') + format(abs(datum.change_pp), '.1f') + ' pts since 2016'",
+      "as": "change_label"
+    },
+    {
+      "calculate": "format(datum.australian_born_percent_published, '.1f') + '%'",
+      "as": "pct_label"
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "col",
+      "type": "ordinal",
+      "scale": {"domain": [0, 1, 2, 3], "paddingInner": 0.08, "paddingOuter": 0},
+      "axis": null
+    },
+    "y": {
+      "field": "row",
+      "type": "ordinal",
+      "scale": {"domain": [0, 1, 2, 3], "paddingInner": 0.08, "paddingOuter": 0},
+      "axis": null
+    }
+  },
+  "layer": [
+    {
+      "params": [
+        {
+          "name": "hoverTile",
+          "select": {
+            "type": "point",
+            "on": "pointerover",
+            "clear": "pointerout",
+            "fields": ["state_code"]
+          }
+        }
+      ],
+      "mark": {"type": "rect", "cornerRadius": 5},
+      "encoding": {
+        "color": {
+          "field": "australian_born_percent_published",
+          "type": "quantitative",
+          "title": "Born in Australia (%)",
+          "scale": {
+            "domain": [60, 80],
+            "range": ["#e3eee6", "#a9cfbf", "#5e9f8a", "#2a7a66", "#0f4a40"],
+            "clamp": true
+          },
+          "legend": {
+            "orient": "bottom",
+            "direction": "horizontal",
+            "gradientLength": 200,
+            "values": [60, 65, 70, 75, 80],
+            "format": "d"
+          }
+        },
+        "stroke": {"condition": {"param": "hoverTile", "empty": false, "value": "#19302e"}, "value": null},
+        "strokeWidth": {"value": 2.5},
+        "tooltip": [
+          {"field": "state_name", "title": "State/territory"},
+          {"field": "year", "type": "ordinal", "title": "Census"},
+          {
+            "field": "australian_born_percent_published",
+            "type": "quantitative",
+            "format": ".1f",
+            "title": "Born in Australia (%)"
+          },
+          {
+            "field": "australian_born_count",
+            "type": "quantitative",
+            "format": ",",
+            "title": "People born in Australia"
+          },
+          {
+            "field": "census_population",
+            "type": "quantitative",
+            "format": ",",
+            "title": "All residents counted"
+          },
+          {
+            "field": "change_pp",
+            "type": "quantitative",
+            "format": "+.1f",
+            "title": "Change since 2016 (percentage points)"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {"type": "text", "baseline": "bottom", "dy": -2, "fontSize": 13, "fontWeight": 700},
+      "encoding": {
+        "text": {"field": "state_code"},
+        "color": {
+          "condition": {"test": "datum.australian_born_percent_published >= 72", "value": "#ffffff"},
+          "value": "#19302e"
+        }
+      }
+    },
+    {
+      "mark": {"type": "text", "baseline": "top", "dy": 3, "fontSize": 13},
+      "encoding": {
+        "text": {"field": "pct_label"},
+        "color": {
+          "condition": {"test": "datum.australian_born_percent_published >= 72", "value": "#ffffff"},
+          "value": "#19302e"
+        }
+      }
+    },
+    {
+      "transform": [{"filter": "datum.year != datum.first_year && !compact"}],
+      "mark": {"type": "text", "baseline": "top", "dy": 21, "fontSize": 10.5},
+      "encoding": {
+        "text": {"field": "change_label"},
+        "color": {
+          "condition": {"test": "datum.australian_born_percent_published >= 72", "value": "#e6f2ec"},
+          "value": "#3f524d"
+        }
+      }
+    }
+  ],
+  "config": {"view": {"stroke": null}}
+}

@@ -1,0 +1,9 @@
+﻿state_code,state_name,asgs_state_code,population_2016,population_2021,growth_persons,growth_percent,source_id
+NSW,New South Wales,1,7480228,8072163,591935,7.913,ABS_LOC
+VIC,Victoria,2,5926624,6503491,576867,9.733,ABS_LOC
+QLD,Queensland,3,4703193,5156138,452945,9.631,ABS_LOC
+SA,South Australia,4,1676653,1781516,104863,6.254,ABS_LOC
+WA,Western Australia,5,2474410,2660026,185616,7.501,ABS_LOC
+TAS,Tasmania,6,509965,557571,47606,9.335,ABS_LOC
+NT,Northern Territory,7,228833,232605,3772,1.648,ABS_LOC
+ACT,Australian Capital Territory,8,397397,454499,57102,14.369,ABS_LOC

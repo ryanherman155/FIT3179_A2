@@ -1,0 +1,196 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Chart 09 - Packed-circle chart (Vega pack layout) of the five largest overseas countries of birth in the 2021 Census. Each leaf circle's AREA is proportional to the number of residents born in that country. The dashed outer circle encloses only these five groups - it does not represent all people born overseas. Label colour switches to dark ink on the two lightest circles for legibility.",
+  "width": 560,
+  "height": 480,
+  "padding": 4,
+  "autosize": "none",
+  "signals": [
+    {"name": "labelSize", "update": "clamp(width / 34, 11, 15)"},
+    {"name": "packSize", "update": "min(width, height - 46)"},
+    {"name": "packX", "update": "(width - packSize) / 2"},
+    {
+      "name": "hoverCountry",
+      "value": null,
+      "on": [
+        {"events": "@leaf:pointerover", "update": "datum.country_of_birth"},
+        {"events": "@leaf:pointerout", "update": "null"}
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "births",
+      "url": "data/09_birthplace_top_five_circles.csv",
+      "format": {"type": "csv", "parse": {"population_2021": "number"}},
+      "transform": [
+        {"type": "formula", "as": "group", "expr": "'Top five overseas countries of birth'"},
+        {
+          "type": "formula",
+          "as": "short_name",
+          "expr": "indexof(datum.country_of_birth, 'China') == 0 ? 'China*' : datum.country_of_birth"
+        },
+        {
+          "type": "window",
+          "sort": {"field": "population_2021", "order": "descending"},
+          "ops": ["rank"],
+          "as": ["rank"]
+        }
+      ]
+    },
+    {
+      "name": "tree",
+      "source": "births",
+      "transform": [
+        {"type": "nest", "keys": ["group"], "generate": true},
+        {
+          "type": "pack",
+          "field": "population_2021",
+          "sort": {"field": "value", "order": "descending"},
+          "size": [{"signal": "packSize"}, {"signal": "packSize"}],
+          "padding": 6
+        }
+      ]
+    },
+    {
+      "name": "leaves",
+      "source": "tree",
+      "transform": [{"type": "filter", "expr": "!datum.children"}]
+    },
+    {
+      "name": "parentNode",
+      "source": "tree",
+      "transform": [{"type": "filter", "expr": "datum.children && datum.depth == 1"}]
+    },
+    {
+      "name": "population2021",
+      "url": "data/01_historical_population_timeline.csv",
+      "format": {"type": "csv", "parse": {"year": "number", "population": "number"}},
+      "transform": [{"type": "filter", "expr": "datum.year == 2021"}]
+    },
+    {
+      "name": "summary",
+      "source": "births",
+      "transform": [
+        {"type": "aggregate", "fields": ["population_2021"], "ops": ["sum"], "as": ["total"]},
+        {"type": "formula", "as": "nationalPop", "expr": "data('population2021')[0].population"},
+        {"type": "formula", "as": "share", "expr": "datum.total / datum.nationalPop * 100"}
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "fill",
+      "type": "ordinal",
+      "domain": ["England", "India", "China (excludes SARs and Taiwan)", "New Zealand", "Philippines"],
+      "range": ["#1d6b5c", "#d9703f", "#3d8a77", "#8fc0ad", "#b3d6c8"]
+    }
+  ],
+  "marks": [
+    {
+      "type": "group",
+      "encode": {
+        "update": {
+          "x": {"signal": "packX"},
+          "y": {"value": 0},
+          "width": {"signal": "packSize"},
+          "height": {"signal": "packSize"}
+        }
+      },
+      "marks": [
+        {
+          "type": "symbol",
+          "name": "outline",
+          "from": {"data": "parentNode"},
+          "encode": {
+            "update": {
+              "shape": {"value": "circle"},
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "size": {"signal": "4 * datum.r * datum.r"},
+              "fill": {"value": "transparent"},
+              "stroke": {"value": "#9aa39d"},
+              "strokeDash": {"value": [4, 4]},
+              "strokeWidth": {"value": 1}
+            }
+          }
+        },
+        {
+          "type": "symbol",
+          "name": "leaf",
+          "from": {"data": "leaves"},
+          "encode": {
+            "enter": {
+              "shape": {"value": "circle"},
+              "tooltip": {
+                "signal": "{'title': datum.country_of_birth, 'Residents born there (2021)': format(datum.population_2021, ','), 'Rank among overseas countries of birth': datum.rank, 'Share of everyone counted in 2021': format(datum.population_2021 / data('population2021')[0].population * 100, '.1f') + '%'}"
+              }
+            },
+            "update": {
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "size": {"signal": "4 * datum.r * datum.r"},
+              "fill": {"scale": "fill", "field": "country_of_birth"},
+              "stroke": {"signal": "hoverCountry == datum.country_of_birth ? '#19302e' : '#fffefa'"},
+              "strokeWidth": {"signal": "hoverCountry == datum.country_of_birth ? 3 : 2"},
+              "cursor": {"value": "pointer"}
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {"data": "leaves"},
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "dy": {"signal": "-clamp(datum.r * 0.04, 1, 4)"},
+              "align": {"value": "center"},
+              "baseline": {"value": "bottom"},
+              "text": {"field": "short_name"},
+              "fontSize": {"signal": "clamp(datum.r * 0.27, 9, labelSize + 2)"},
+              "fontWeight": {"value": 700},
+              "fill": {"signal": "datum.rank >= 4 ? '#19302e' : '#ffffff'"}
+            }
+          }
+        },
+        {
+          "type": "text",
+          "from": {"data": "leaves"},
+          "interactive": false,
+          "encode": {
+            "update": {
+              "x": {"field": "x"},
+              "y": {"field": "y"},
+              "dy": {"signal": "clamp(datum.r * 0.08, 3, 6)"},
+              "align": {"value": "center"},
+              "baseline": {"value": "top"},
+              "text": {"signal": "format(datum.population_2021, ',')"},
+              "fontSize": {"signal": "clamp(datum.r * 0.24, 8.5, labelSize)"},
+              "fill": {"signal": "datum.rank >= 4 ? '#19302e' : '#ffffff'"}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "from": {"data": "summary"},
+      "interactive": false,
+      "encode": {
+        "update": {
+          "x": {"signal": "width / 2"},
+          "y": {"signal": "packSize + 16"},
+          "align": {"value": "center"},
+          "baseline": {"value": "top"},
+          "text": {
+            "signal": "'Together: ' + format(datum.total, ',') + ' people, ' + format(datum.share, '.1f') + '% of everyone counted in 2021'"
+          },
+          "fontSize": {"signal": "labelSize - 1"},
+          "fill": {"value": "#3f524d"}
+        }
+      }
+    }
+  ]
+}

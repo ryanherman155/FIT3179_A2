@@ -1,0 +1,336 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 02 - Interval heat strip. Each of the 16 cells spans the true length of one gap between Censuses. Top strip: average growth per year (annualised). Bottom strip: total people added across the interval.",
+  "params": [{"name": "compact", "value": false}],
+  "data": {
+    "url": "data/02_intercensal_growth_heatstrip.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "start_year": "number",
+        "end_year": "number",
+        "interval_years": "number",
+        "population_start": "number",
+        "population_end": "number",
+        "absolute_growth": "number",
+        "annualised_growth_percent": "number"
+      }
+    }
+  },
+  "transform": [
+    {"calculate": "datum.start_year + '–' + datum.end_year", "as": "interval"},
+    {"calculate": "datum.absolute_growth / 1000000", "as": "growth_m"},
+    {
+      "calculate": "(datum.population_end / datum.population_start - 1) * 100",
+      "as": "total_growth_percent"
+    },
+    {
+      "joinaggregate": [
+        {"op": "max", "field": "annualised_growth_percent", "as": "max_rate"},
+        {"op": "min", "field": "annualised_growth_percent", "as": "min_rate"},
+        {"op": "max", "field": "absolute_growth", "as": "max_added"}
+      ]
+    }
+  ],
+  "spacing": 46,
+  "vconcat": [
+    {
+      "title": {
+        "text": "Average growth per year (%)",
+        "subtitle": "The yearly rate that, compounded over the interval, produces the observed change",
+        "subtitleColor": "#66736d",
+        "subtitleFontSize": 12
+      },
+      "width": 1000,
+      "height": 64,
+      "encoding": {
+        "x": {
+          "field": "start_year",
+          "type": "quantitative",
+          "title": null,
+          "scale": {"domain": [1911, 2021], "nice": false, "zero": false},
+          "axis": null
+        }
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverRate",
+              "select": {
+                "type": "point",
+                "on": "pointerover",
+                "clear": "pointerout",
+                "fields": ["start_year"]
+              }
+            }
+          ],
+          "mark": {"type": "rect", "stroke": "#fffefa", "strokeWidth": 2, "cornerRadius": 2},
+          "encoding": {
+            "color": {
+              "field": "annualised_growth_percent",
+              "type": "quantitative",
+              "title": "% per year",
+              "scale": {
+                "domain": [0.8, 2.6],
+                "range": ["#eef3ec", "#a9cfbf", "#4f9a86", "#1d7a68", "#0f4a40"]
+              },
+              "legend": {
+                "orient": "right",
+                "format": ".1f",
+                "gradientLength": 56,
+                "titleFontSize": 11,
+                "labelFontSize": 11,
+                "direction": "vertical",
+                "values": [1, 1.5, 2, 2.5]
+              }
+            },
+            "strokeWidth": {"condition": {"param": "hoverRate", "empty": false, "value": 3}, "value": 2},
+            "stroke": {
+              "condition": {"param": "hoverRate", "empty": false, "value": "#19302e"},
+              "value": "#fffefa"
+            },
+            "tooltip": [
+              {"field": "interval", "title": "Interval"},
+              {"field": "interval_years", "title": "Length (years)"},
+              {
+                "field": "population_start",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Population at start"
+              },
+              {
+                "field": "population_end",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Population at end"
+              },
+              {
+                "field": "absolute_growth",
+                "type": "quantitative",
+                "format": ",",
+                "title": "People added"
+              },
+              {
+                "field": "total_growth_percent",
+                "type": "quantitative",
+                "format": ".1f",
+                "title": "Total growth over interval (%)"
+              },
+              {
+                "field": "annualised_growth_percent",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Average growth per year (%)"
+              }
+            ],
+            "x2": {"field": "end_year"}
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 12, "fontWeight": 600},
+          "encoding": {
+            "x": {"field": "mid", "type": "quantitative"},
+            "text": {"field": "annualised_growth_percent", "type": "quantitative", "format": ".1f"},
+            "color": {
+              "condition": {"test": "datum.annualised_growth_percent >= 1.85", "value": "#ffffff"},
+              "value": "#19302e"
+            },
+            "opacity": {"condition": {"test": "compact", "value": 0}, "value": 1}
+          },
+          "transform": [{"calculate": "(datum.start_year + datum.end_year) / 2", "as": "mid"}]
+        },
+        {
+          "description": "Annotations for the fastest and slowest intervals (identified from the data, not typed in). They sit either side of 1947, where the two intervals meet.",
+          "layer": [
+            {
+              "transform": [
+                {"filter": "datum.annualised_growth_percent == datum.max_rate"},
+                {"calculate": "'▲ Fastest: ' + datum.interval", "as": "note"}
+              ],
+              "mark": {
+                "type": "text",
+                "align": "left",
+                "baseline": "top",
+                "dx": 2,
+                "dy": 38,
+                "fontSize": 11.5,
+                "fontWeight": 600,
+                "color": "#135a4c"
+              },
+              "encoding": {"x": {"field": "start_year", "type": "quantitative"}, "text": {"field": "note"}}
+            },
+            {
+              "transform": [
+                {"filter": "datum.annualised_growth_percent == datum.min_rate"},
+                {"calculate": "'Slowest: ' + datum.interval + ' ▼'", "as": "note"}
+              ],
+              "mark": {
+                "type": "text",
+                "align": "right",
+                "baseline": "top",
+                "dx": -6,
+                "dy": 38,
+                "fontSize": 11.5,
+                "fontWeight": 600,
+                "color": "#66736d"
+              },
+              "encoding": {"x": {"field": "end_year", "type": "quantitative"}, "text": {"field": "note"}}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": {
+        "text": "People added across the interval (millions)",
+        "subtitle": "Longer intervals have more time to add people",
+        "subtitleColor": "#66736d",
+        "subtitleFontSize": 12
+      },
+      "width": 1000,
+      "height": 64,
+      "encoding": {
+        "x": {
+          "field": "start_year",
+          "type": "quantitative",
+          "title": null,
+          "scale": {"domain": [1911, 2021], "nice": false, "zero": false},
+          "axis": {
+            "values": [
+              1911,
+              1921,
+              1933,
+              1947,
+              1954,
+              1961,
+              1966,
+              1971,
+              1976,
+              1981,
+              1986,
+              1991,
+              2001,
+              2006,
+              2011,
+              2016,
+              2021
+            ],
+            "format": "d",
+            "labelExpr": "compact ? (indexof([1911, 1947, 1991, 2021], datum.value) >= 0 ? datum.label : '') : (indexof([1966, 1976, 1986, 2006, 2016], datum.value) >= 0 ? '' : datum.label)",
+            "domain": false,
+            "tickSize": 6,
+            "tickColor": "#9aa39d",
+            "labelFontSize": 11.5
+          }
+        }
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverAdd",
+              "select": {
+                "type": "point",
+                "on": "pointerover",
+                "clear": "pointerout",
+                "fields": ["start_year"]
+              }
+            }
+          ],
+          "mark": {"type": "rect", "stroke": "#fffefa", "strokeWidth": 2, "cornerRadius": 2},
+          "encoding": {
+            "color": {
+              "field": "growth_m",
+              "type": "quantitative",
+              "title": "Million people",
+              "scale": {
+                "domain": [0.7, 2.1],
+                "range": ["#fbeee4", "#f2c4a4", "#e3925f", "#c7612f", "#8f3a16"]
+              },
+              "legend": {
+                "orient": "right",
+                "format": ".1f",
+                "gradientLength": 56,
+                "titleFontSize": 11,
+                "labelFontSize": 11,
+                "direction": "vertical",
+                "values": [0.8, 1.2, 1.6, 2]
+              }
+            },
+            "strokeWidth": {"condition": {"param": "hoverAdd", "empty": false, "value": 3}, "value": 2},
+            "stroke": {
+              "condition": {"param": "hoverAdd", "empty": false, "value": "#19302e"},
+              "value": "#fffefa"
+            },
+            "tooltip": [
+              {"field": "interval", "title": "Interval"},
+              {"field": "interval_years", "title": "Length (years)"},
+              {
+                "field": "population_start",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Population at start"
+              },
+              {
+                "field": "population_end",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Population at end"
+              },
+              {
+                "field": "absolute_growth",
+                "type": "quantitative",
+                "format": ",",
+                "title": "People added"
+              },
+              {
+                "field": "total_growth_percent",
+                "type": "quantitative",
+                "format": ".1f",
+                "title": "Total growth over interval (%)"
+              },
+              {
+                "field": "annualised_growth_percent",
+                "type": "quantitative",
+                "format": ".2f",
+                "title": "Average growth per year (%)"
+              }
+            ],
+            "x2": {"field": "end_year"}
+          }
+        },
+        {
+          "transform": [{"calculate": "(datum.start_year + datum.end_year) / 2", "as": "mid"}],
+          "mark": {"type": "text", "fontSize": 12, "fontWeight": 600},
+          "encoding": {
+            "x": {"field": "mid", "type": "quantitative"},
+            "text": {"field": "growth_m", "type": "quantitative", "format": ".1f"},
+            "color": {
+              "condition": {"test": "datum.growth_m >= 1.5", "value": "#ffffff"},
+              "value": "#19302e"
+            },
+            "opacity": {"condition": {"test": "compact", "value": 0}, "value": 1}
+          }
+        },
+        {
+          "transform": [
+            {"filter": "datum.absolute_growth == datum.max_added"},
+            {"calculate": "'▲ Most people added: ' + datum.interval", "as": "note"}
+          ],
+          "mark": {
+            "type": "text",
+            "align": "right",
+            "baseline": "top",
+            "dy": 62,
+            "fontSize": 11.5,
+            "fontWeight": 600,
+            "color": "#a8502a"
+          },
+          "encoding": {"x": {"field": "end_year", "type": "quantitative"}, "text": {"field": "note"}}
+        }
+      ]
+    }
+  ],
+  "resolve": {"scale": {"color": "independent"}}
+}

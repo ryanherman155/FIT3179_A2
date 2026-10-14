@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Becoming Australia — An Australian Census Story, 1911–2021</title>
+  <meta name="description" content="An interactive data story about how Australia's population, geography, demographic make-up and households changed across 110 years of national Censuses.">
+  <meta name="author" content="[STUDENT NAME]">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27%23142826%27/%3E%3Ccircle cx=%2722%27 cy=%2711%27 r=%275%27 fill=%27%23d9703f%27/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<a class="skip-link" href="#scale">Skip to the story</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="#top" aria-label="Becoming Australia, back to top">becoming australia<i aria-hidden="true"></i></a>
+    <nav class="navlinks" aria-label="Chapters">
+      <a href="#scale">01 Scale</a>
+      <a href="#geography">02 Geography</a>
+      <a href="#identity">03 Identity</a>
+      <a href="#home">04 Home</a>
+      <a href="#about">Sources</a>
+    </nav>
+  </div>
+  <div class="progress" aria-hidden="true"></div>
+</header>
+
+<main id="top">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div>
+        <div class="kicker">An Australian Census Story &nbsp;/&nbsp; 1911–2021</div>
+        <h1 id="hero-title"><span>We grew.</span><span>We moved.</span><span><em>We changed.</em></span></h1>
+        <p class="hero-lede">Every few years, the Census counts every person in Australia on a single night. Line up 110 years of those snapshots and a larger story appears: how many of us there are, where we live, where we come from, how old we are and who we share a home with.</p>
+        <a class="hero-action" href="#scale">Begin the story <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="ring"></div>
+        <div class="ring inner"></div>
+        <div class="hero-circle">
+          <span class="hero-number" data-stat="pop2021_m">25.4</span>
+          <small>million people · 2021</small>
+        </div>
+        <div class="orbit-chip orbit-a">1911 Census<b><span data-stat="pop1911_m2">4.46</span>m</b>people</div>
+        <div class="orbit-chip orbit-b">110 years later<b><span data-stat="ratio_1911_2021">5.7</span>×</b>as many people</div>
+      </div>
+    </div>
+    <div class="hero-footer">
+      <div class="hero-footer-inner">
+        <span>17 national Censuses · four chapters · twelve visualisations</span>
+        <span>Scroll to explore ↓</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRIMER ===================== -->
+  <section class="primer" aria-label="Three things to know before you start">
+    <div class="primer-grid">
+      <div>
+        <h2>What is the Census?</h2>
+        <p>A count of every person and household in Australia on Census night, run by the Australian Bureau of Statistics (ABS). It has been held every five years since 1961.</p>
+      </div>
+      <div>
+        <h2>How to read the charts</h2>
+        <p>Hover over or tap any mark to see exact figures. Buttons above some charts switch the view. Each chart's source and specification file are linked below it.</p>
+      </div>
+      <div>
+        <h2>A note on comparisons</h2>
+        <p>Census methods have changed since 1911. Where a change affects what you see, such as who was counted, a note beside the chart explains it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CHAPTER 1 ===================== -->
+  <section id="scale" class="section" aria-labelledby="ch1-title">
+    <div class="chapter-no">Chapter 01 / The scale of change</div>
+    <h2 class="chapter-title" id="ch1-title">From a small nation to 25 million lives.</h2>
+    <p class="chapter-intro">The first national Census in 1911 counted <strong><span data-stat="pop1911_m2">4.46</span> million</strong> people. The 2021 Census counted <strong><span data-stat="pop2021_m">25.4</span> million</strong>, about <span data-stat="ratio_1911_2021">5.7</span> times as many. Growth was not steady, though. It slowed during depression and war, then surged in the decades after 1947.</p>
+
+    <div class="figure-grid">
+      <figure class="figure reveal" aria-labelledby="f01-title">
+        <div class="figure-type"><span class="num">01</span>Annotated time series</div>
+        <h3 id="f01-title">110 years of population growth</h3>
+        <p class="figure-sub">People counted at each national Census, 1911–2021 · every dot is one Census</p>
+        <div class="chart" data-vis="01" aria-label="Line chart of Australia's Census population at 17 Censuses, rising from 4.46 million in 1911 to 25.4 million in 2021."></div>
+        <p class="figure-note"><strong>Reading the gaps:</strong> the line joins Census counts with straight segments. It does not show year-to-year changes between them. No Census was held between 1933 and 1947. Before the 1967 referendum, official totals excluded many Aboriginal people, so counts up to 1966 are not fully comparable with later ones.</p>
+        <div class="figure-footer">
+          <span>Source: ABS Census counts, 1911–2021</span>
+          <span class="links"><a href="data/01_historical_population_timeline.csv">Data (CSV)</a><a href="vis/01.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="stat-row reveal">
+      <div class="stat"><b>+<span data-stat="added_2011_2021_m">3.9</span>m</b><span>people added in a single decade, from the 2011 Census to the 2021 Census.</span></div>
+      <div class="stat"><b><span data-stat="pop1971_m">12.8</span>m</b><span>people counted in 1971, almost exactly half the 2021 total. The population roughly doubled in 50 years.</span></div>
+      <div class="stat"><b><span data-stat="max_added_m">2.02</span>m</b><span>people added between <span data-stat="max_added_interval">2016 and 2021</span>, more than in any other gap between Censuses.</span></div>
+    </div>
+
+    <div class="figure-grid">
+      <figure class="figure reveal" aria-labelledby="f02-title">
+        <div class="figure-type"><span class="num">02</span>Interval heat strip</div>
+        <h3 id="f02-title">The fastest growth came early. The most people came recently.</h3>
+        <p class="figure-sub">Each cell is one gap between Censuses, drawn to its true length in years. Darker cells mean more growth.</p>
+        <div class="chart" data-vis="02" aria-label="Two heat strips across 16 intervals between Censuses. Average growth per year peaked at 2.5 per cent in 1947 to 1954. The number of people added peaked at 2.02 million in 2016 to 2021."></div>
+        <p class="figure-note"><strong>Two ways to measure growth:</strong> the top strip is the average yearly rate (<span data-stat="fastest_rate">2.46</span>% a year in <span data-stat="fastest_interval">1947–1954</span>, the fastest). The bottom strip is the total number of people added. Because the population is now much bigger, a modest rate today adds more people than a high rate did in the 1950s.</p>
+        <div class="figure-footer">
+          <span>Source: calculated from ABS Census counts (chart 01)</span>
+          <span class="links"><a href="data/02_intercensal_growth_heatstrip.csv">Data (CSV)</a><a href="vis/02.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <div class="quote-break"><div class="inner"><div class="big-mark" aria-hidden="true">“</div><p>The national total hides a very uneven map. Where, exactly, do all those Australians live, and where did the newest arrivals settle?</p></div></div>
+
+  <!-- ===================== CHAPTER 2 ===================== -->
+  <section id="geography" class="section" aria-labelledby="ch2-title">
+    <div class="chapter-no">Chapter 02 / The geography of growth</div>
+    <h2 class="chapter-title" id="ch2-title">One country. Very different places.</h2>
+    <p class="chapter-intro">In 2021, New South Wales and Victoria together held <strong><span data-stat="nsw_vic_share">57.3</span>%</strong> of everyone counted. The largest states by area are among the emptiest. Between 2016 and 2021, the biggest states added the most people, but the fastest growth was in the smallest jurisdiction, the Australian Capital Territory.</p>
+
+    <div class="figure-grid">
+      <figure class="figure reveal" aria-labelledby="f03-title">
+        <div class="figure-type"><span class="num">03</span>Map idiom 1 · Choropleth (small multiples)</div>
+        <h3 id="f03-title">Where the people are, and how tightly they live</h3>
+        <p class="figure-sub">2021 Census, by state and territory. Left: total residents. Right: residents per square kilometre of land.</p>
+        <div class="chart" data-vis="03" aria-label="Two choropleth maps of Australia. New South Wales, Victoria and Queensland have the most residents. Per square kilometre, the ACT and Victoria are the most densely settled and the Northern Territory the least."></div>
+        <p class="figure-note"><strong>Why two maps?</strong> On the left, big states look important simply because they cover a lot of land. Dividing by land area (right) shows how crowded each place is: Western Australia has more residents than South Australia, but about one person for every square kilometre. Colours step through fixed ranges, shown in each legend.</p>
+        <div class="figure-footer">
+          <span>Sources: ABS 2021 Census counts; ABS ASGS Edition 3 boundaries and land areas</span>
+          <span class="links"><a href="data/03_state_population_choropleth.csv">Data (CSV)</a><a href="vis/03.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure span-7 pair-keep reveal" aria-labelledby="f04-title">
+        <div class="figure-type"><span class="num">04</span>Map idiom 2 · Proportional symbols</div>
+        <h3 id="f04-title">Where population was added</h3>
+        <p class="figure-sub">Increase in residents between the 2016 and 2021 Censuses. Circle area = people added; colour = percentage increase.</p>
+        <div class="chart" data-vis="04" aria-label="Map with circles sized by population increase from 2016 to 2021. New South Wales and Victoria added the most people. The ACT grew fastest in percentage terms. The Northern Territory changed least."></div>
+        <p class="figure-note">Circle <strong>area</strong>, not width, is proportional to the number of people added, so a circle twice the area means twice as many people. Circles sit inside each state; they do not show where in the state people settled.</p>
+        <div class="figure-footer">
+          <span>Source: ABS Census 2016 &amp; 2021</span>
+          <span class="links"><a href="data/04_state_growth_symbol_map.csv">Data (CSV)</a><a href="vis/04.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure span-5 pair-keep reveal" aria-labelledby="f05-title">
+        <div class="figure-type"><span class="num">05</span>Map idiom 3 · Tile-grid map</div>
+        <h3 id="f05-title">Born here? It depends where “here” is</h3>
+        <p class="figure-sub">Share of residents born in Australia (%), by state and territory</p>
+        <div class="chart" data-vis="05" aria-label="Tile-grid map of the share of residents born in Australia. In 2021, Tasmania had the highest share at 79.1 per cent and Western Australia the lowest at 62.0 per cent."></div>
+        <p class="figure-note"><strong>Schematic map:</strong> every state gets an equal tile in roughly its real position, so small places like the ACT are as visible as Western Australia. Tiles are <strong>not</strong> drawn to scale. This chart shows country of birth, not ancestry or cultural background.</p>
+        <div class="figure-footer">
+          <span>Source: ABS 2021 State QuickStats</span>
+          <span class="links"><a href="data/05_australian_born_tile_map.csv">Data (CSV)</a><a href="vis/05.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure reveal" aria-labelledby="f06-title">
+        <div class="figure-type"><span class="num">06</span>Dumbbell plot</div>
+        <h3 id="f06-title">The biggest states added the most people, but not the fastest growth</h3>
+        <p class="figure-sub">Residents at the 2016 and 2021 Censuses · ordered by 2021 population · label = percentage increase (people added)</p>
+        <div class="chart" data-vis="06" aria-label="Dumbbell plot of 2016 and 2021 populations for eight states and territories. Every jurisdiction grew. The ACT grew fastest at 14.4 per cent and the Northern Territory slowest at 1.6 per cent."></div>
+        <div class="figure-footer">
+          <span>Source: ABS Census 2016 &amp; 2021</span>
+          <span class="links"><a href="data/06_state_population_dumbbell.csv">Data (CSV)</a><a href="vis/06.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="editorial-note reveal">
+      <p><strong>Reading the maps:</strong> all three maps show whole states and territories. People are not spread evenly within a state; most live in the capital cities and along the coast. Boundaries come from the ABS Australian Statistical Geography Standard (2021) and are drawn with an equal-area projection, so the size of each state on screen matches its real land area. The ABS also counts a small number of people in “Other Territories” (Jervis Bay, Christmas Island, Cocos (Keeling) Islands and Norfolk Island): <span data-stat="other_territories">4,779</span> in 2021. They are not shown.</p>
+    </div>
+  </section>
+
+  <div class="quote-break"><div class="inner"><div class="big-mark" aria-hidden="true">“</div><p>A bigger, more spread-out nation is also a different nation. Who are we now?</p></div></div>
+
+  <!-- ===================== CHAPTER 3 ===================== -->
+  <section id="identity" class="section" aria-labelledby="ch3-title">
+    <div class="chapter-no">Chapter 03 / Who we are</div>
+    <h2 class="chapter-title" id="ch3-title">Older, and connected to more of the world.</h2>
+    <p class="chapter-intro">Two long-running changes shape the modern population. Australians are older: the share aged 65 and over rose from <strong><span data-stat="age65_2011">14.0</span>%</strong> to <strong><span data-stat="age65_2021">17.2</span>%</strong> in just ten years. And many more Australians were born overseas, with India now the second-largest overseas country of birth. These changes happened at the same time; the charts do not show that one caused the other.</p>
+
+    <div class="figure-grid">
+      <figure class="figure span-5 pair-keep reveal" aria-labelledby="f07-title">
+        <div class="figure-type"><span class="num">07</span>Slopegraph</div>
+        <h3 id="f07-title">A century of ageing</h3>
+        <p class="figure-sub">Share of the population aged 0–14 and 65+, 1911 and 2021 (rounded to whole percentages)</p>
+        <div class="chart" data-vis="07" aria-label="Slopegraph. Children aged 0 to 14 fell from 35 per cent of the population in 1911 to 17 per cent in 2021. People aged 65 and over rose from 4 per cent to 17 per cent."></div>
+        <p class="figure-note"><strong>Two snapshots only:</strong> the lines join 1911 and 2021 directly. They do not show the baby-boom rise in between. These figures come from the Australian Institute of Family Studies and are rounded. The ABS 2021 Census count puts children at 18.2% (chart 08), so treat the 2021 tie as approximate.</p>
+        <div class="figure-footer">
+          <span>Source: AIFS, Population, households and families (2023)</span>
+          <span class="links"><a href="data/07_historical_age_slopegraph.csv">Data (CSV)</a><a href="vis/07.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure span-7 pair-keep reveal" aria-labelledby="f08-title">
+        <div class="figure-type"><span class="num">08</span>Heatmap</div>
+        <h3 id="f08-title">In just ten years, the oldest group grew the most</h3>
+        <p class="figure-sub">Share of all people counted in each age group, 2011 and 2021 Censuses, with the change in percentage points</p>
+        <div class="chart" data-vis="08" aria-label="Heatmap of age-group shares in 2011 and 2021. The 65 and over share rose by 3.2 percentage points. Every younger group's share fell slightly."></div>
+        <p class="figure-note">A <strong>percentage point</strong> is the simple difference between two percentages: 14.0% to 17.2% is a rise of 3.2 points. Every younger group still <em>grew</em> in number; it is their <em>share</em> of the population that fell. Hover a cell for the head count.</p>
+        <div class="figure-footer">
+          <span>Source: ABS 2011 &amp; 2021 Australia QuickStats</span>
+          <span class="links"><a href="data/08_age_group_heatmap.csv">Data (CSV)</a><a href="vis/08.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure span-5 pair-keep reveal" aria-labelledby="f09-title">
+        <div class="figure-type"><span class="num">09</span>Packed circles</div>
+        <h3 id="f09-title">The five largest overseas birthplaces</h3>
+        <p class="figure-sub">Residents born in each country, 2021 Census · circle area = number of people</p>
+        <div class="chart" data-vis="09" aria-label="Packed circle chart. England is the largest overseas country of birth with 927,490 residents, followed by India, China, New Zealand and the Philippines."></div>
+        <p class="figure-note">These five countries are only part of the overseas-born population; people were born in hundreds of other countries. *China excludes the Special Administrative Regions (Hong Kong and Macau) and Taiwan.</p>
+        <div class="figure-footer">
+          <span>Source: ABS 2021 Australia QuickStats</span>
+          <span class="links"><a href="data/09_birthplace_top_five_circles.csv">Data (CSV)</a><a href="vis/09.json">Vega spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure span-7 pair-keep reveal" aria-labelledby="f10-title">
+        <div class="figure-type"><span class="num">10</span>Ranked comparison matrix</div>
+        <h3 id="f10-title">India moved from fourth to second in five years</h3>
+        <p class="figure-sub">Top five overseas countries of birth: rank, Census count and growth, 2016 → 2021</p>
+        <div class="chart" data-vis="10" aria-label="Ranked matrix. India rose from fourth to second place, growing 47.9 per cent. The Philippines grew 26.5 per cent. England, New Zealand and China grew between 2 and 8 per cent."></div>
+        <p class="figure-note"><strong>Not the same as migration:</strong> a change in the number of residents born in a country reflects new arrivals, but also deaths, people leaving Australia and changes in who answered the question. It is not a measure of net migration.</p>
+        <div class="figure-footer">
+          <span>Source: ABS 2021 Australia QuickStats (with 2016 comparison)</span>
+          <span class="links"><a href="data/10_birthplace_growth_matrix.csv">Data (CSV)</a><a href="vis/10.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="big-insight reveal">
+      <div class="figure-no">+<span data-stat="india_growth">47.9</span>%</div>
+      <p><strong>India-born residents grew by <span data-stat="india_added">217,967</span> people in five years</strong>, the largest increase of the five, overtaking both New Zealand and China. Together, the top five overseas birthplaces account for <span data-stat="top5_total_m">2.97</span> million people, or <span data-stat="top5_share">11.7</span>% of everyone counted.</p>
+    </div>
+  </section>
+
+  <div class="quote-break"><div class="inner"><div class="big-mark" aria-hidden="true">“</div><p>More people than ever, but fewer of them under each roof. The story ends at the front door.</p></div></div>
+
+  <!-- ===================== CHAPTER 4 ===================== -->
+  <section id="home" class="section" aria-labelledby="ch4-title">
+    <div class="chapter-no">Chapter 04 / How we live</div>
+    <h2 class="chapter-title" id="ch4-title">The shrinking Australian household.</h2>
+    <p class="chapter-intro">A growing population did not mean bigger homes. In 1911 the average household held about <strong><span data-stat="hh_1911">4.5</span> people</strong>; by 2021 it held <strong><span data-stat="hh_2021">2.5</span></strong>. Living alone has become common. More than one in four households now has just one person in it.</p>
+
+    <div class="figure-grid">
+      <figure class="figure span-7 pair-keep reveal" aria-labelledby="f11-title">
+        <div class="figure-type"><span class="num">11</span>Isotype pictogram</div>
+        <h3 id="f11-title">The average household, then and now</h3>
+        <p class="figure-sub">Average number of people per household (rounded), selected Census years</p>
+        <div class="chart" data-vis="11" aria-label="Pictogram rows of person icons. Average household size was 4.5 in 1911, 3.6 in 1961, 2.6 in 2001 and 2.5 in 2021."></div>
+        <p class="figure-note"><strong>Reading part-figures:</strong> an average of 4.5 is drawn as four figures plus half of a fifth. That half-figure is part of an <em>average</em>; no household contains half a person. Figures are rounded to one decimal place.</p>
+        <div class="figure-footer">
+          <span>Source: AIFS, Population, households and families (2023), drawing on ABS Censuses</span>
+          <span class="links"><a href="data/11_household_size_isotype.csv">Data (CSV)</a><a href="vis/11.json">Vega spec</a></span>
+        </div>
+      </figure>
+
+      <figure class="figure span-5 pair-keep reveal" aria-labelledby="f12-title">
+        <div class="figure-type"><span class="num">12</span>Waffle chart</div>
+        <h3 id="f12-title"><span data-stat="one_person">26</span> in every 100 homes hold one person</h3>
+        <p class="figure-sub">All households in 2021 · each square = 1% of households</p>
+        <div class="chart" data-vis="12" aria-label="Waffle chart of 100 squares. 26 squares represent one-person households and 74 represent all other households in 2021."></div>
+        <p class="figure-note">Click a legend entry to highlight that group. Percentages are rounded to whole numbers. AIFS reports that the one-person share was about 18% in 1981 and 24% in 2016.</p>
+        <div class="figure-footer">
+          <span>Source: AIFS, Population, households and families (2023)</span>
+          <span class="links"><a href="data/12_one_person_household_waffle.csv">Data (CSV)</a><a href="vis/12.json">Vega-Lite spec</a></span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="editorial-note reveal">
+      <p><strong>What sits behind smaller households?</strong> The data here show <em>what</em> changed, not <em>why</em>. An ageing population (chapter 3) and more people living alone fit together: AIFS notes that half of women who live alone are 65 or older. Smaller families, later partnering and more housing choices are also part of the picture, but they are not measured in these charts.</p>
+    </div>
+  </section>
+
+  <!-- ===================== ENDING ===================== -->
+  <section class="ending" aria-labelledby="end-title">
+    <div class="ending-inner">
+      <div class="kicker">The story in four sentences</div>
+      <h2 id="end-title">Australia grew beyond recognition. The Census shows how.</h2>
+      <div class="summary-grid">
+        <div><h3>Scale</h3><p>The population grew about <span data-stat="ratio_1911_2021">5.7</span>-fold in 110 years, and recent Censuses have added the most people ever.</p></div>
+        <div><h3>Geography</h3><p>Most people live in a few south-eastern states, and growth is fastest in some of the smallest places.</p></div>
+        <div><h3>Identity</h3><p>We are older than ever, and among the largest overseas-born groups, those born in India and the Philippines grew fastest.</p></div>
+        <div><h3>Home</h3><p>Households have shrunk to an average of <span data-stat="hh_2021">2.5</span> people, and one in four homes holds a single person.</p></div>
+      </div>
+      <p class="closing">Each chart here is a snapshot of a single night. Taken together, they show a nation that keeps redefining itself. The 2026 Census, whose results are still to come, will add the next chapter.</p>
+
+      <div class="about" id="about">
+        <div>
+          <h3>Data sources</h3>
+          <ul>
+            <li>Australian Bureau of Statistics (ABS), historical Census counts 1911–1986 and the 1991 Census. <a href="https://www.abs.gov.au/census/find-census-data/historical">abs.gov.au/census/find-census-data/historical</a></li>
+            <li>ABS Census QuickStats: Australia 2001, 2006, 2011 and 2021; states and territories 2021. <a href="https://www.abs.gov.au/census/find-census-data/quickstats/2021/AUS">abs.gov.au/census/find-census-data/quickstats</a></li>
+            <li>ABS, <em>Location: Census</em>, 2021 (state and territory counts, 2016 and 2021). <a href="https://www.abs.gov.au/statistics/people/people-and-communities/location-census/2021">abs.gov.au/…/location-census/2021</a></li>
+            <li>Australian Institute of Family Studies (AIFS), <em>Population, households and families</em>, July 2023. <a href="https://aifs.gov.au/all-research/facts-and-figures/population-households-and-families">aifs.gov.au/…/population-households-and-families</a></li>
+            <li>ABS, Australian Statistical Geography Standard (ASGS) Edition 3, State and Territory boundaries 2021 and land areas (simplified). © Commonwealth of Australia, CC BY 4.0. <a href="https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026">abs.gov.au/…/asgs-edition-3</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Method</h3>
+          <p>All twelve charts are built with <a href="https://vega.github.io/vega-lite/">Vega-Lite</a> or <a href="https://vega.github.io/vega/">Vega</a> and read the CSV files in the <a href="data/">data</a> folder directly. Each chart's specification is a JSON file in the <a href="vis/">vis</a> folder. Growth rates, densities and percentage-point changes are calculated inside the specifications from the published counts.</p>
+          <p>Early Censuses counted people where they were on Census night; recent Censuses mostly count people where they usually live. Before 1967, official totals excluded many Aboriginal people. Country of birth is not the same as ancestry.</p>
+        </div>
+        <div>
+          <h3>About this work</h3>
+          <p>Created by <span class="placeholder">[STUDENT NAME]</span> (<span class="placeholder">[STUDENT ID]</span>) for FIT3179 Data Visualisation 2, Monash University. Published <span class="placeholder">[DD Month 2026]</span>.</p>
+          <p><strong>AI acknowledgement:</strong> generative AI (Anthropic Claude) was used to help write code, chart specifications and draft text, and to check data. All data, figures and wording were reviewed by the author. <a href="AI_ACKNOWLEDGEMENT.md">Full statement</a>.</p>
+          <p>Typefaces: Playfair Display, DM Sans and DM Mono (SIL Open Font License, via Google Fonts). Libraries: Vega, Vega-Lite, Vega-Embed (BSD-3-Clause).</p>
+        </div>
+      </div>
+      <div class="copyright">
+        <span>FIT3179 · Data Visualisation 2 · Monash University · 2026</span>
+        <span>Becoming Australia · No data fabricated · <a href="SOURCES.md" style="color:inherit">Source register</a></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/vega@5.30.0/build/vega.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5.21.0/build/vega-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0/build/vega-embed.min.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Chart 10 - Ranked comparison matrix for the five largest overseas countries of birth. Panel 1 is a rank (bump) column showing how each country's rank changed from the 2016 to the 2021 Census. Panels 2 and 3 are aligned to the 2021 rank: the Census counts, and a colour-coded cell for percentage growth with the number of people added.",
+  "params": [{"name": "compact", "value": false}],
+  "data": {
+    "url": "data/10_birthplace_growth_matrix.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "population_2016": "number",
+        "population_2021": "number",
+        "growth_persons": "number",
+        "growth_percent": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "calculate": "indexof(datum.country_of_birth, 'China') == 0 ? 'China*' : datum.country_of_birth",
+      "as": "country"
+    },
+    {
+      "window": [{"op": "rank", "as": "rank_2021"}],
+      "sort": [{"field": "population_2021", "order": "descending"}]
+    },
+    {
+      "window": [{"op": "rank", "as": "rank_2016"}],
+      "sort": [{"field": "population_2016", "order": "descending"}]
+    }
+  ],
+  "spacing": 14,
+  "hconcat": [
+    {
+      "title": {"text": "Rank, 2016 → 2021", "fontSize": 12, "fontWeight": 600},
+      "width": 330,
+      "height": 290,
+      "transform": [
+        {"fold": ["rank_2016", "rank_2021"], "as": ["census", "rank"]},
+        {"calculate": "datum.census == 'rank_2016' ? '2016' : '2021'", "as": "census_year"},
+        {"calculate": "datum.rank_2021 < datum.rank_2016", "as": "rose"}
+      ],
+      "encoding": {
+        "x": {
+          "field": "census_year",
+          "type": "ordinal",
+          "title": null,
+          "scale": {"type": "point", "padding": 1.3},
+          "axis": {
+            "orient": "top",
+            "domain": false,
+            "ticks": false,
+            "labelAngle": 0,
+            "labelFontWeight": 700,
+            "labelColor": "#19302e",
+            "labelFontSize": 12
+          }
+        },
+        "y": {
+          "field": "rank",
+          "type": "ordinal",
+          "title": null,
+          "scale": {"domain": [1, 2, 3, 4, 5]},
+          "axis": null
+        }
+      },
+      "layer": [
+        {
+          "mark": {"type": "line", "strokeWidth": 3, "strokeCap": "round"},
+          "encoding": {
+            "detail": {"field": "country"},
+            "color": {"condition": {"test": "datum.rose", "value": "#d9703f"}, "value": "#b9c9c1"}
+          }
+        },
+        {
+          "mark": {"type": "circle", "size": 90, "opacity": 1, "stroke": "#fffefa", "strokeWidth": 1.5},
+          "encoding": {
+            "color": {"condition": {"test": "datum.rose", "value": "#d9703f"}, "value": "#8fa79c"},
+            "tooltip": [
+              {"field": "country_of_birth", "title": "Country of birth"},
+              {"field": "census_year", "title": "Census"},
+              {"field": "rank", "title": "Rank among overseas countries of birth"}
+            ]
+          }
+        },
+        {
+          "transform": [{"filter": "datum.census_year == '2016'"}],
+          "mark": {"type": "text", "align": "right", "dx": -10, "fontSize": 12.5},
+          "encoding": {
+            "text": {"field": "country"},
+            "color": {"condition": {"test": "datum.rose", "value": "#a8502a"}, "value": "#5d6a64"}
+          }
+        },
+        {
+          "transform": [{"filter": "datum.census_year == '2021'"}],
+          "mark": {"type": "text", "align": "left", "dx": 10, "fontSize": 12.5},
+          "encoding": {
+            "text": {"field": "country"},
+            "color": {"condition": {"test": "datum.rose", "value": "#a8502a"}, "value": "#19302e"}
+          }
+        }
+      ]
+    },
+    {
+      "title": {"text": "Residents born there", "fontSize": 12, "fontWeight": 600},
+      "width": 300,
+      "height": 290,
+      "transform": [
+        {
+          "calculate": "compact ? format(datum.population_2016 / 1000, '.0f') + 'k → ' + format(datum.population_2021 / 1000, '.0f') + 'k' : format(datum.population_2016, ',') + '  →  ' + format(datum.population_2021, ',')",
+          "as": "count_label"
+        }
+      ],
+      "encoding": {
+        "y": {
+          "field": "rank_2021",
+          "type": "ordinal",
+          "scale": {"domain": [1, 2, 3, 4, 5]},
+          "axis": null
+        }
+      },
+      "layer": [
+        {
+          "mark": {
+            "type": "rect",
+            "color": "#f3f2ec",
+            "cornerRadius": 3,
+            "stroke": "#fffefa",
+            "strokeWidth": 4
+          },
+          "encoding": {
+            "x": {"datum": 0, "type": "quantitative", "scale": {"domain": [0, 1]}, "axis": null},
+            "x2": {"datum": 1},
+            "tooltip": [
+              {"field": "country_of_birth", "title": "Country of birth"},
+              {
+                "field": "population_2016",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2016 Census"
+              },
+              {
+                "field": "population_2021",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2021 Census"
+              }
+            ]
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 13, "color": "#19302e"},
+          "encoding": {
+            "x": {"datum": 0.5, "type": "quantitative"},
+            "text": {"field": "count_label"},
+            "tooltip": [
+              {"field": "country_of_birth", "title": "Country of birth"},
+              {
+                "field": "population_2016",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2016 Census"
+              },
+              {
+                "field": "population_2021",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2021 Census"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": {"text": "Growth, 2016–2021", "fontSize": 12, "fontWeight": 600},
+      "width": 240,
+      "height": 290,
+      "transform": [
+        {
+          "calculate": "['+' + format(datum.growth_percent, '.1f') + '%', '+' + format(datum.growth_persons, ',') + ' people']",
+          "as": "growth_lines"
+        },
+        {"calculate": "'+' + format(datum.growth_percent, '.1f') + '%'", "as": "growth_short"}
+      ],
+      "encoding": {
+        "y": {
+          "field": "rank_2021",
+          "type": "ordinal",
+          "scale": {"domain": [1, 2, 3, 4, 5]},
+          "axis": null
+        }
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "hoverGrowth",
+              "select": {"type": "point", "on": "pointerover", "clear": "pointerout"}
+            }
+          ],
+          "mark": {"type": "rect", "cornerRadius": 3, "stroke": "#fffefa", "strokeWidth": 4},
+          "encoding": {
+            "x": {"datum": 0, "type": "quantitative", "scale": {"domain": [0, 1]}, "axis": null},
+            "x2": {"datum": 1},
+            "color": {
+              "field": "growth_percent",
+              "type": "quantitative",
+              "title": "Growth (%)",
+              "scale": {
+                "domain": [0, 50],
+                "range": ["#fbeee4", "#f2c4a4", "#e3925f", "#c7612f", "#8f3a16"]
+              },
+              "legend": {
+                "orient": "bottom",
+                "direction": "horizontal",
+                "gradientLength": 120,
+                "values": [0, 25, 50],
+                "format": "d"
+              }
+            },
+            "tooltip": [
+              {"field": "country_of_birth", "title": "Country of birth"},
+              {
+                "field": "population_2016",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2016 Census"
+              },
+              {
+                "field": "population_2021",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Residents, 2021 Census"
+              },
+              {
+                "field": "growth_persons",
+                "type": "quantitative",
+                "format": ",",
+                "title": "Change (people)"
+              },
+              {
+                "field": "growth_percent",
+                "type": "quantitative",
+                "format": ".1f",
+                "title": "Change (%)"
+              }
+            ]
+          }
+        },
+        {
+          "mark": {"type": "text", "fontSize": 13, "fontWeight": 600, "lineHeight": 16},
+          "encoding": {
+            "x": {"datum": 0.5, "type": "quantitative"},
+            "text": {"condition": {"test": "compact", "field": "growth_short"}, "field": "growth_lines"},
+            "color": {
+              "condition": {"test": "datum.growth_percent >= 25", "value": "#ffffff"},
+              "value": "#19302e"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "resolve": {"scale": {"color": "independent", "x": "independent"}},
+  "config": {"view": {"stroke": null}}
+}
