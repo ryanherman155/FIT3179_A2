@@ -82,6 +82,10 @@
       if (stacked && s.hconcat) { s.vconcat = s.hconcat; delete s.hconcat; }
       var each = stacked ? w - 8 : (w - 48) / 2;
       (s.hconcat || s.vconcat).forEach(function (v) { v.width = each; v.height = each * 0.84; });
+      // Dot-density dots keep the same size relative to the map at every width.
+      (s.hconcat || s.vconcat)[0].layer.forEach(function (l) {
+        if (l.mark && l.mark.type === "circle") l.mark.size = Math.max(5, 13 * Math.pow(each / 520, 2));
+      });
       setParam(s, "compact", each < 420);
       return s;
     },

@@ -1,13 +1,13 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "Chart 03 - Choropleth maps (small multiples) of the 2021 Census population of the eight states and territories. Left: total residents. Right: residents per square kilometre (population divided by ABS land area), which removes the visual bias of very large states. Albers equal-area conic projection.",
+  "description": "Chart 03 - Two maps of the 2021 Census population of the eight states and territories. Left: dot-density map of total residents (one dot = 50,000 people; dots are placed at random within each state by tools/make_dot_density.js, so their position inside a state has no meaning). Right: choropleth of residents per square kilometre (population divided by ABS land area). Albers equal-area conic projection.",
   "params": [{"name": "compact", "value": false}],
   "spacing": 40,
   "hconcat": [
     {
       "title": {
         "text": "Total residents",
-        "subtitle": "2021 Census count",
+        "subtitle": "● = 50,000 people (2021 Census count)",
         "subtitleColor": "#66736d",
         "subtitleFontSize": 12
       },
@@ -38,9 +38,8 @@
           "as": "density"
         },
         {
-          "calculate": "datum.population_2021 < 500000 ? 'Under 0.5 million' : datum.population_2021 < 1000000 ? '0.5–1 million' : datum.population_2021 < 2000000 ? '1–2 million' : datum.population_2021 < 5000000 ? '2–5 million' : 'Over 5 million'",
-          "as": "pop_class",
-          "description": "Classed colour scale: fixed class breaks, written once here and shown in the legend."
+          "calculate": "round(datum.population_2021 / 50000)",
+          "as": "dots"
         }
       ],
       "layer": [
@@ -56,34 +55,8 @@
               }
             }
           ],
-          "mark": {"type": "geoshape", "stroke": "#fffefa", "strokeWidth": 1.2, "strokeJoin": "round"},
+          "mark": {"type": "geoshape", "fill": "#e9efe8", "stroke": "#fffefa", "strokeWidth": 1.2, "strokeJoin": "round"},
           "encoding": {
-            "color": {
-              "field": "pop_class",
-              "type": "ordinal",
-              "title": "Residents",
-              "scale": {
-                "domain": [
-                  "Under 0.5 million",
-                  "0.5–1 million",
-                  "1–2 million",
-                  "2–5 million",
-                  "Over 5 million"
-                ],
-                "range": ["#e6efe6", "#b5d4c6", "#74ad99", "#2f8571", "#11574a"]
-              },
-              "legend": {
-                "orient": "bottom",
-                "direction": "horizontal",
-                "columns": 3,
-                "symbolType": "square",
-                "symbolSize": 150,
-                "labelFontSize": 11.5,
-                "columnPadding": 10,
-                "rowPadding": 4,
-                "labelLimit": 140
-              }
-            },
             "strokeWidth": {"condition": {"param": "hoverTotal", "empty": false, "value": 2.5}, "value": 1.2},
             "stroke": {
               "condition": {"param": "hoverTotal", "empty": false, "value": "#19302e"},
@@ -97,19 +70,19 @@
                 "format": ",",
                 "title": "Residents (2021 Census)"
               },
-              {
-                "field": "properties.area_albers_sqkm",
-                "type": "quantitative",
-                "format": ",.0f",
-                "title": "Land area (km²)"
-              },
-              {
-                "field": "density",
-                "type": "quantitative",
-                "format": ",.1f",
-                "title": "Residents per km²"
-              }
+              {"field": "dots", "type": "quantitative", "title": "Dots (1 = 50,000 people)"}
             ]
+          }
+        },
+        {
+          "data": {
+            "url": "data/03_dot_density_points.csv",
+            "format": {"type": "csv", "parse": {"longitude": "number", "latitude": "number"}}
+          },
+          "mark": {"type": "circle", "size": 13, "color": "#1f6f5e", "opacity": 0.85},
+          "encoding": {
+            "longitude": {"field": "longitude", "type": "quantitative"},
+            "latitude": {"field": "latitude", "type": "quantitative"}
           }
         },
         {
@@ -163,25 +136,40 @@
               }
             },
             {
+              "description": "Pale halo drawn under each label so it stays readable over the dots.",
               "mark": {
                 "type": "text",
                 "fontSize": 12,
                 "fontWeight": 600,
                 "lineHeight": 14,
                 "baseline": "middle",
-                "align": "center"
+                "align": "center",
+                "stroke": "#fffefa",
+                "strokeWidth": 4,
+                "strokeJoin": "round",
+                "color": "#fffefa"
               },
               "encoding": {
                 "longitude": {"field": "label_longitude", "type": "quantitative"},
                 "latitude": {"field": "label_latitude", "type": "quantitative"},
-                "text": {"field": "lines"},
-                "color": {
-                  "condition": {
-                    "test": "datum.population_2021 >= 2000000 && datum.label_longitude == datum.longitude",
-                    "value": "#ffffff"
-                  },
-                  "value": "#19302e"
-                }
+                "text": {"field": "lines"}
+              },
+              "transform": [{"filter": "datum.state_code != 'ACT'"}]
+            },
+            {
+              "mark": {
+                "type": "text",
+                "fontSize": 12,
+                "fontWeight": 600,
+                "lineHeight": 14,
+                "baseline": "middle",
+                "align": "center",
+                "color": "#19302e"
+              },
+              "encoding": {
+                "longitude": {"field": "label_longitude", "type": "quantitative"},
+                "latitude": {"field": "label_latitude", "type": "quantitative"},
+                "text": {"field": "lines"}
               },
               "transform": [{"filter": "datum.state_code != 'ACT'"}]
             },
@@ -193,19 +181,13 @@
                 "lineHeight": 14,
                 "baseline": "middle",
                 "align": "left",
-                "dx": 3
+                "dx": 3,
+                "color": "#19302e"
               },
               "encoding": {
                 "longitude": {"field": "label_longitude", "type": "quantitative"},
                 "latitude": {"field": "label_latitude", "type": "quantitative"},
-                "text": {"field": "lines"},
-                "color": {
-                  "condition": {
-                    "test": "datum.population_2021 >= 2000000 && datum.state_code != 'ACT'",
-                    "value": "#ffffff"
-                  },
-                  "value": "#19302e"
-                }
+                "text": {"field": "lines"}
               },
               "transform": [{"filter": "datum.state_code == 'ACT'"}]
             }
